@@ -4,7 +4,7 @@
 
 | 주소 | 내용 |
 |---|---|
-| [sparklab-edu.github.io](https://sparklab-edu.github.io/) | 수업 목록 |
+| [sparklab-edu.github.io](https://sparklab-edu.github.io/) | 수업 목록·SPARK LAB 소개 |
 | [route.html](https://sparklab-edu.github.io/route.html) · [#sample](https://sparklab-edu.github.io/route.html#sample) | 통학로 진단(공공데이터 열기·거르기·합치기·순찰 지역 정하기, 경로 비교 `#w11`, 오류 신고 `#report`) |
 | [stopping.html](https://sparklab-edu.github.io/stopping.html) · [#sample](https://sparklab-edu.github.io/stopping.html#sample) | 정지거리 측정 |
 | [structure.html](https://sparklab-edu.github.io/structure.html) · [structure25.html](https://sparklab-edu.github.io/structure25.html) | 수업 슬라이드: 표와 다이어그램 |
