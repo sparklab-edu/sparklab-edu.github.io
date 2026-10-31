@@ -75,7 +75,7 @@ table.t tr.sum td{font-weight:700;border-top:2px solid var(--asph);border-bottom
 .vz .side .qq{background:var(--zone-soft);border-left:6px solid var(--zone);padding:14px 16px;border-radius:4px;font-weight:700}
 svg text{font-family:var(--font)}
 /* 고르기 카드 */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;flex:1}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;flex:1}.cards.c4{grid-template-columns:1fr 1fr}
 .card{background:var(--paper);border-radius:6px;padding:20px 22px;cursor:pointer;display:flex;flex-direction:column;border:2px solid transparent}
 .card .k{font-size:15px;color:var(--faint);font-weight:700}
 .card .c{font-size:22px;line-height:1.45;margin-top:6px;flex:1}
@@ -178,7 +178,7 @@ const R={
   viz:s=>`<div class="body"><h2>${md(s.h)}</h2><div class="views">${s.views.map((v,i)=>`<button data-v="${v.k}" aria-pressed="${i===0}">${esc(v.label)}</button>`).join('')}</div><div class="vz"><div class="fig"></div><div class="side"><div class="qq"></div></div></div></div>`,
   tree:s=>`<div class="body"><h2>${md(s.h)}</h2><div class="panel" style="flex:1;display:flex;align-items:center">${tree(s.tree)}</div>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
   graph:s=>`<div class="body"><h2>${md(s.h)}</h2><div class="panel" style="flex:1;display:flex;align-items:center">${graph(s.graph)}</div>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
-  choose:s=>`<div class="body"><h2>${md(s.h)}<small>카드를 누르면 답</small></h2><div class="cards">${s.cases.map((c,i)=>`<div class="card"><div class="k">${'가나다라마바사'[i]}</div><div class="c">${md(c.t)}</div><div class="a"><b>${esc(c.a)}</b><br>${md(c.why)}</div></div>`).join('')}</div></div>`,
+  choose:s=>`<div class="body"><h2>${md(s.h)}<small>카드를 누르면 답</small></h2><div class="cards${s.cases.length===4?' c4':''}">${s.cases.map((c,i)=>`<div class="card"><div class="k">${'가나다라마바사'[i]}</div><div class="c">${md(c.t)}</div><div class="a"><b>${esc(c.a)}</b><br>${md(c.why)}</div></div>`).join('')}</div></div>`,
   activity:s=>`<div class="body"><h2>${md(s.h)}${s.where?`<small>${esc(s.where)}</small>`:''}</h2><div class="act"><div class="task">${s.src?`<div class="src">${md(s.src)}</div>`:''}<ol>${s.task.map(t=>`<li>${md(t)}</li>`).join('')}</ol>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div><div class="timer" data-min="${s.minutes||5}"><div class="m">${String(s.minutes||5).padStart(2,'0')}:00</div><div class="h">눌러서 시작 · T</div></div></div></div>`,
   answer:s=>`<div class="body"><h2>${md(s.h)}</h2><div style="display:flex;gap:30px;flex:1;min-height:0"><div>${tableHTML(s.table)}</div><div class="fig panel" style="flex:1;display:flex;align-items:center;justify-content:center" data-step="1">${pie(s.data,1,{unit:s.unit})}</div></div>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
   sort:s=>`<div class="body"><h2>${md(s.h)}</h2><div class="sortbox"><i data-step="1"></i><i data-step="2"></i><i data-step="3"></i></div></div>`,
