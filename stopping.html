@@ -762,6 +762,7 @@ label{line-height:1.5}
 input[type=text],input[type=number],select,textarea{border:1px solid var(--edge);border-radius:5px;padding:0 10px;height:40px;background:#fff}
 textarea{height:auto;padding:8px 10px}
 input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--asphalt)}
+input[type=range]{accent-color:var(--asphalt);height:24px;cursor:pointer}
 input[type=checkbox],input[type=radio]{accent-color:var(--asphalt);width:16px;height:16px;vertical-align:-3px}
 textarea{width:100%;resize:vertical}
 label textarea{display:block;margin-top:6px}
@@ -818,7 +819,7 @@ table.dt tr.sel td{background:#e7eef8}
 .find:first-child{border-top:none}
 .find .tag{flex:none;font-size:12.5px;font-weight:700;padding:1px 0;min-width:3.6em;border-bottom:3px solid var(--line)}
 .find .act-hide{border-color:var(--faint)}.find .act-fix{border-color:var(--ok)}.find .act-keep{border-color:var(--zone)}
-.find .x{margin-left:auto;border:none;background:none;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:13px}
+.find .x{margin-left:auto;flex:none;white-space:nowrap;border:none;background:none;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:13px}
 
 .map{height:56vh;min-height:380px;border-radius:5px;border:1px solid var(--line)}
 .split{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
@@ -871,8 +872,9 @@ table.dt tr.sel td{background:#e7eef8}
   #teacher{inset:8px;padding:16px}
   section.view{padding:18px 16px 40px}
   .lead{margin-left:0}
-  .col{grid-template-columns:minmax(0,1fr) auto}
+  .col{grid-template-columns:minmax(0,1fr)}
   .col .ex{grid-column:1/-1;grid-row:2;margin-top:4px}
+  .col .seg{justify-self:start;margin-top:8px}
   .col .fb{grid-column:1/-1}
 }
 /* 측정·관찰 표(정지거리 3단계, 문제 정의 관찰 넣기) */
@@ -884,6 +886,8 @@ table.meas td.fb3{white-space:normal;font-size:13px;min-width:200px}
 .tstar{font-size:26px;line-height:26px;color:var(--zone);text-shadow:0 0 1px var(--ink),0 0 2px var(--ink);white-space:nowrap}
 .tstar span{font-size:12px;font-weight:700;color:#fff;background:var(--asphalt);padding:1px 5px;border-radius:3px;margin-left:2px;vertical-align:4px;text-shadow:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* 코드 문자열은 SPARK- 뒤에서 끊기지 않게 글자 단위로 줄바꿈 */
+textarea[placeholder^="SPARK"],.code{word-break:break-all}
 </style>
 <style>
 /* P 정지거리 측정만 쓰는 것 */

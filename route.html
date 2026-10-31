@@ -13,11 +13,18 @@
 .repmk{display:inline-grid;place-items:center;width:24px;height:24px;background:#fff;border:2px solid var(--asphalt);border-radius:50%;font-weight:700;font-size:13px;cursor:pointer}
 .scarymk{display:inline-block;background:var(--red);color:#fff;font-weight:700;font-size:13px;line-height:1;padding:4px 6px 3px;border-radius:3px}
 #view .btn.ghost[aria-pressed=true]{background:var(--asphalt);border-color:var(--asphalt);color:#fff}
-.wrow{display:grid;grid-template-columns:150px 1fr 22px;align-items:center;gap:10px;margin:6px 0}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) 2ch;align-items:center;column-gap:12px;margin:10px 0 4px}
+.wrow span{grid-column:1/-1;line-height:1.4}
+.wrow input{width:100%;margin:2px 0}
 .wrow b{text-align:right;font-variant-numeric:tabular-nums}
 table.cmp{border-collapse:collapse;width:100%;font-size:14px}
 table.cmp th,table.cmp td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left}
-table.cmp td.n{text-align:right;font-variant-numeric:tabular-nums}
+table.cmp td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.cmp{word-break:keep-all}table.cmp thead th{text-align:right;vertical-align:bottom;line-height:1.3}
+table.cmp .sw{display:block;width:16px;height:5px;margin:0 0 4px auto}
+.sent .sl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:18px;margin:8px 0}
+.sent .sf{display:flex;align-items:center;gap:6px;flex:0 1 300px;min-width:200px}.sent .sf.grow{flex:1 1 300px}
+.sent .sf input{flex:1;min-width:0}
 img.capov{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;max-width:none;z-index:200}
 .capbox{position:relative;cursor:crosshair;line-height:0}.capbox img{width:100%;display:block}
 .pinmk{position:absolute;transform:translate(-50%,-100%);background:var(--asphalt);color:#fff;font-size:12px;font-weight:700;line-height:1;padding:4px 6px 3px;border-radius:3px;white-space:nowrap;pointer-events:none}
@@ -779,6 +786,7 @@ label{line-height:1.5}
 input[type=text],input[type=number],select,textarea{border:1px solid var(--edge);border-radius:5px;padding:0 10px;height:40px;background:#fff}
 textarea{height:auto;padding:8px 10px}
 input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--asphalt)}
+input[type=range]{accent-color:var(--asphalt);height:24px;cursor:pointer}
 input[type=checkbox],input[type=radio]{accent-color:var(--asphalt);width:16px;height:16px;vertical-align:-3px}
 textarea{width:100%;resize:vertical}
 label textarea{display:block;margin-top:6px}
@@ -835,7 +843,7 @@ table.dt tr.sel td{background:#e7eef8}
 .find:first-child{border-top:none}
 .find .tag{flex:none;font-size:12.5px;font-weight:700;padding:1px 0;min-width:3.6em;border-bottom:3px solid var(--line)}
 .find .act-hide{border-color:var(--faint)}.find .act-fix{border-color:var(--ok)}.find .act-keep{border-color:var(--zone)}
-.find .x{margin-left:auto;border:none;background:none;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:13px}
+.find .x{margin-left:auto;flex:none;white-space:nowrap;border:none;background:none;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:13px}
 
 .map{height:56vh;min-height:380px;border-radius:5px;border:1px solid var(--line)}
 .split{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
@@ -888,8 +896,9 @@ table.dt tr.sel td{background:#e7eef8}
   #teacher{inset:8px;padding:16px}
   section.view{padding:18px 16px 40px}
   .lead{margin-left:0}
-  .col{grid-template-columns:minmax(0,1fr) auto}
+  .col{grid-template-columns:minmax(0,1fr)}
   .col .ex{grid-column:1/-1;grid-row:2;margin-top:4px}
+  .col .seg{justify-self:start;margin-top:8px}
   .col .fb{grid-column:1/-1}
 }
 /* 측정·관찰 표(정지거리 3단계, 문제 정의 관찰 넣기) */
@@ -901,6 +910,8 @@ table.meas td.fb3{white-space:normal;font-size:13px;min-width:200px}
 .tstar{font-size:26px;line-height:26px;color:var(--zone);text-shadow:0 0 1px var(--ink),0 0 2px var(--ink);white-space:nowrap}
 .tstar span{font-size:12px;font-weight:700;color:#fff;background:var(--asphalt);padding:1px 5px;border-radius:3px;margin-left:2px;vertical-align:4px;text-shadow:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* 코드 문자열은 SPARK- 뒤에서 끊기지 않게 글자 단위로 줄바꿈 */
+textarea[placeholder^="SPARK"],.code{word-break:break-all}
 </style>
 </head>
 <body>
@@ -1196,8 +1207,10 @@ function rptAgg(list){
 /* 통학로 진단 · 경로 비교(W11 「AI 추천은 누구의 기준인가」) 계산. DOM 없음(node 시험 tests/route.test.mjs).
    도로망 roads.json(tools/build_roads.py, OpenStreetMap)으로 기준 비중에 따른 길을 찾고, 길 둘레 안전시설을 센다.
    앱의 길 찾기는 "기준이 바뀌면 최적이 바뀐다"를 보여 주는 작은 모형이다. 실제 지도 앱의 방법과 같지 않다. */
-var CRIT11=[{k:'fast',t:'빨리'},{k:'safe',t:'안전시설 많이'},{k:'signal',t:'신호등 있는 횡단보도'},{k:'big',t:'밝은 큰길'},{k:'familiar',t:'익숙한 길'}];
-var GUESS11=[{k:'fast',t:'빨리 · 짧게'},{k:'big',t:'큰길'},{k:'safe',t:'안전시설'},{k:'unknown',t:'잘 모르겠다'}];
+// 기준 이름 = 앱이 실제로 보는 데이터(10/31 확정). fast 길이 · big 도로 등급(OSM) · safe 둘레 40m CCTV·비상벨 · signal 신호등 없는 횡단보도 · familiar 내가 그린 길
+var CRIT11=[{k:'fast',t:'짧은 길'},{k:'big',t:'큰길'},{k:'safe',t:'CCTV·비상벨이 가까운 길'},{k:'signal',t:'신호등 없는 횡단보도가 적은 길'},{k:'familiar',t:'내가 다니는 길'}];
+// 추천 길이 중시한 것(추측): 추천 앱은 내 길을 모르므로 familiar는 넣지 않는다
+var GUESS11=[{k:'fast',t:'짧은 길'},{k:'big',t:'큰길'},{k:'safe',t:'CCTV·비상벨이 가까운 길'},{k:'signal',t:'신호등 없는 횡단보도가 적은 길'},{k:'unknown',t:'잘 모르겠다'}];
 // 2차시 앞뒤에 같은 질문 "지도 앱 추천 길은 믿을 만할까?" (값 1~4, 높을수록 믿음)
 var TRUST11=[{v:4,t:'믿을 만하다'},{v:3,t:'대체로 믿을 만하다'},{v:2,t:'잘 모르겠다'},{v:1,t:'그대로 믿기 어렵다'}];
 var WALK_M_PER_MIN=67; // 걷는 빠르기 약 4km/h
@@ -1224,7 +1237,7 @@ function roadsLoad(R){
 function nearestNode(G,p){let best=-1,bd=Infinity;for(const n of G.adj.keys()){const d=distM(G.pts[n],p);if(d<bd){bd=d;best=n;}}return best;}
 // 익숙한 길: 내 길에서 40m 넘게 떨어진 도로 = 1
 function famFar(G,path){if(!path||path.length<2)return null;return G.edges.map(e=>{const m=G.pts[e.ids[Math.floor(e.ids.length/2)]];return nearPath(path,m,40)?0:1;});}
-// 기준 비중 w(0~3) → 도로 하나의 비용. "빨리" 0이어도 길이는 조금 남겨 빙빙 돌지 않게 한다
+// 기준 비중 w(0~4) → 도로 하나의 비용. "짧은 길" 0이어도 길이는 조금 남겨 빙빙 돌지 않게 한다
 function edgeCost(e,i,w,fam){
   let c=e.len*(0.25+(w.fast||0));
   c+=e.len*(w.safe||0)*e.far;
@@ -1266,7 +1279,7 @@ function pathStats(G,path){
 function alignXform(p1,p2,P1,P2){const vx=p2[0]-p1[0],vy=p2[1]-p1[1],Vx=P2[0]-P1[0],Vy=P2[1]-P1[1],v=Math.hypot(vx,vy),V=Math.hypot(Vx,Vy);
   if(v<20)return {ok:false,s:1,rad:0};return {ok:true,s:V/v,rad:Math.atan2(Vy,Vx)-Math.atan2(vy,vx)};}
 // 순위(1~5) → 기준 비중
-function rankWeights(rank){const W={1:3,2:2,3:1,4:0.5,5:0},w={};CRIT11.forEach(c=>w[c.k]=W[rank[c.k]]??0);return w;}
+function rankWeights(rank){const W={1:4,2:3,3:2,4:1,5:0},w={};CRIT11.forEach(c=>w[c.k]=W[rank[c.k]]??0);return w;}
 function rankOk(rank){const v=CRIT11.map(c=>+rank[c.k]);return v.every(x=>x>=1&&x<=5)&&new Set(v).size===5;}
 function rankOrder(rank){return CRIT11.slice().sort((a,b)=>rank[a.k]-rank[b.k]).map(c=>c.k);}
 
@@ -1483,7 +1496,7 @@ function gate11c(){let msg='';const l=S11.ai[S11.ai.length-1];
 /* ===== 4. 비교 ===== */
 function stats11(){const G=g11(),my=pathStats(G,myPath()),ai=pathStats(G,aiPath());const so=S11.scary.filter(s=>nearPath(aiPath(),[s.lat,s.lng],NEAR_M)).length,sm=S11.scary.filter(s=>nearPath(myPath(),[s.lat,s.lng],NEAR_M)).length;return{my,ai,so,sm};}
 const ROWS11=[['len','길이','m'],['min','걸어서','분'],['cctv','CCTV','대'],['bell','비상벨','개'],['ns','신호등 없는 횡단보도','곳'],['cam','단속카메라','대']];
-function cmpTable(cols){return `<table class="cmp"><thead><tr><th></th>${cols.map(c=>`<th><span style="display:inline-block;width:16px;height:5px;background:${LC[c.k]};vertical-align:middle;margin-right:6px"></span>${c.t}</th>`).join('')}</tr></thead><tbody>${ROWS11.map(([k,t,u])=>`<tr><th>${t}</th>${cols.map(c=>`<td class="n">${c.s[k]} ${u}</td>`).join('')}</tr>`).join('')}</tbody></table>`;}
+function cmpTable(cols){return `<table class="cmp"><thead><tr><th></th>${cols.map(c=>`<th><span class="sw" style="background:${LC[c.k]}"></span>${c.t}</th>`).join('')}</tr></thead><tbody>${ROWS11.map(([k,t,u])=>`<tr><th>${t}</th>${cols.map(c=>`<td class="n">${c.s[k]} ${u}</td>`).join('')}</tr>`).join('')}</tbody></table>`;}
 function v11d(){
   if(!(ok11b().path&&ok11c()))return need11('비교','2·3단계에서 두 길을 학교까지 그려 주세요.');
   const st=stats11();
@@ -1508,13 +1521,13 @@ function gate11d(){$('#n11d').innerHTML=next11(3,ok11d());bind11(3);}
 let calc11=null;
 function v11e(){
   if(!(ok11b().path&&ok11c()))return need11('기준 바꾸기','2·3단계에서 두 길을 학교까지 그려 주세요.');
-  const w=S11.w;
+  const w=S11.w;CRIT11.forEach(c=>w[c.k]=Math.max(0,Math.min(4,Math.round(+w[c.k]||0)))); // 옛 0~3·0.5 저장값도 정수 칸에 맞춘다
   const rankSel=(id,r)=>CRIT11.map(c=>`<tr><th>${c.t}</th><td><select class="rk" data-g="${id}" data-k="${c.k}" aria-label="${c.t} 순위"><option value="">-</option>${[1,2,3,4,5].map(n=>`<option ${+r[c.k]===n?'selected':''}>${n}</option>`).join('')}</select></td></tr>`).join('');
   $('#view').innerHTML=`<div class="vh"><h2>기준 바꾸기</h2></div>
   <div class="split"><div><div id="map11e" class="map" style="height:52vh"></div>${legend11(['my','ai','calc'])}</div>
    <div><div class="box"><h3>무엇을 얼마나 중요하게 볼까</h3>
-     ${CRIT11.map(c=>`<label class="wrow"><span>${c.t}</span><input type="range" min="0" max="3" step="1" class="wr" data-k="${c.k}" value="${w[c.k]||0}" aria-label="${c.t} 비중"><b id="wv-${c.k}">${w[c.k]||0}</b></label>`).join('')}
-     <div class="hint" style="margin-top:6px">0 = 안 봄 · 3 = 가장 중요</div></div>
+     ${CRIT11.map(c=>`<label class="wrow"><span>${c.t}</span><input type="range" min="0" max="4" step="1" class="wr" data-k="${c.k}" value="${w[c.k]||0}" aria-label="${c.t} 비중"><b id="wv-${c.k}">${w[c.k]||0}</b></label>`).join('')}
+     <div class="hint" style="margin-top:6px">0 = 안 봄 · 4 = 가장 중요</div></div>
     <div class="box"><h3>앱이 찾은 길</h3><div id="cs11"></div></div></div></div>
   <div class="ask">같은 출발점, 같은 지도인데 막대를 바꾸면 왜 길이 바뀔까요?</div>
   <div class="grid2"><div class="box"><h3>내 순위</h3><table class="rkt">${rankSel('rm',S11.rm)}</table><div id="rmm"></div></div>
@@ -1551,7 +1564,9 @@ function v11f(){
   $('#view').innerHTML=`<div class="vh"><h2>결과 카드</h2></div>
   <div class="box"><div class="ask" style="margin-top:0">지금 다시: 지도 앱이 추천하는 길은 믿을 만할까요?</div>${trustBtns('q1')}
     <label style="display:block;margin-top:10px">생각이 그대로이거나 바뀐 까닭<input type="text" id="r1" style="width:100%;margin-top:4px" maxlength="60" value="${esc(S11.r1)}"></label></div>
-  <div class="box"><h3>한 문장</h3><p style="font-size:18px;line-height:2.1;margin:0">추천 길은 <input type="text" id="s1" style="width:220px" maxlength="30" value="${esc(S11.s1)}" placeholder="빨리 가는 것">을(를) 중요하게 본 결과다. 그래서 나는 <input type="text" id="s2" style="width:360px;max-width:100%" maxlength="50" value="${esc(S11.s2)}" placeholder="…">.</p></div>
+  <div class="box sent"><h3>한 문장</h3>
+    <div class="sl">추천 길은 <span class="sf"><input type="text" id="s1" maxlength="30" value="${esc(S11.s1)}" placeholder="짧은 길" aria-label="추천 길이 중요하게 본 것">을(를)</span> 중요하게 본 결과다.</div>
+    <div class="sl">그래서 나는 <span class="sf grow"><input type="text" id="s2" maxlength="50" value="${esc(S11.s2)}" placeholder="…" aria-label="그래서 나는">.</span></div></div>
   <div class="box"><h3>카드에 넣을 지도</h3><div id="map11f" class="map" style="height:auto;width:100%;aspect-ratio:860/652;max-width:760px"></div></div>
   <div class="box"><h3>경로 비교 카드</h3><div id="c11"><div class="hint">위 질문에 답하고 문장 두 칸을 채우면 만들어져요.</div></div></div>
   <div class="box"><h3>경로 비교 코드 <span class="hint">AI 교수·학습 플랫폼에 붙여요</span></h3><div class="code" id="k11"></div><div class="row" style="margin-top:8px"><button class="btn ghost" id="kc11">코드 복사</button><span class="hint" id="km11"></span></div></div>`;
@@ -1594,19 +1609,22 @@ async function card11(shot){
   g.fillStyle=K.ink;g.font=`bold 24px ${FONT}`;g.fillText((GUESS11.find(x=>x.k===S11.guess)||{}).t||'',940,y);
   g.font=`19px ${FONT}`;g.fillStyle=K.sub;wrap(g,`근거: ${S11.why.trim()}`,940,y+34,600,26,1);
   y=sec(g,920,778,640,170,'우리 모둠 기준 순위');
-  g.fillStyle=K.ink;g.font=`bold 21px ${FONT}`;wrap(g,rankOrder(S11.rt).map((k,j)=>`${j+1} ${CRIT11.find(c=>c.k===k).t}`).join('  '),940,y,600,28,2);
-  g.font=`19px ${FONT}`;g.fillStyle=K.sub;wrap(g,`까닭: ${S11.tr.trim()}`,940,y+60,600,26,1);
+  g.fillStyle=K.ink;g.font=`bold 20px ${FONT}`;// 순위는 항목 사이에서만 줄을 바꾼다(이름 중간에서 끊지 않음)
+  const items=rankOrder(S11.rt).map((k,j)=>`${j+1} ${CRIT11.find(c=>c.k===k).t}`),rows=[''];
+  items.forEach(t=>{const cur=rows[rows.length-1],nx=cur?cur+'  ·  '+t:t;if(cur&&g.measureText(nx).width>600)rows.push(t);else rows[rows.length-1]=nx;});
+  rows.slice(0,3).forEach((r,j)=>g.fillText(r,940,y+j*27));const ry=y+Math.min(3,rows.length)*27;
+  g.font=`19px ${FONT}`;g.fillStyle=K.sub;wrap(g,`까닭: ${S11.tr.trim()}`,940,ry+4,600,26,1);
   return cv;
 }
 
-/* ===== 샘플(#w11sample): 출발점 C, 내 길 = 안전 우선 길, 추천 길 = 빨리 길 ===== */
+/* ===== 샘플(#w11sample): 출발점 C, 내 길 = 안전 우선 길, 추천 길 = 짧은 길 ===== */
 function sample11(){
   const G=g11(),s=G.starts[2],thin=(p,n)=>p.filter((q,i)=>i%n===0||i===p.length-1).slice(1).map(q=>[+q[0].toFixed(6),+q[1].toFixed(6)]);
   const my=bestRoute(G,[s.lat,s.lng],[SCHOOL.lat,SCHOOL.lng],{fast:0,big:3}).path,ai=s.ai?[[s.lat,s.lng],...s.ai]:bestRoute(G,[s.lat,s.lng],[SCHOOL.lat,SCHOOL.lng],{fast:3}).path;
   const mid=my[Math.floor(my.length*0.45)];
   return Object.assign(fresh11(),{step:5,max:5,info:{ban:'3',mo:'2',no:'14'},start:{id:s.id,name:s.name,lat:s.lat,lng:s.lng},my:thin(my,3),ai:s.ai?s.ai.map(q=>q.slice()):thin(ai,3),aiRep:!!s.ai,scary:[{lat:mid[0]+0.0002,lng:mid[1],why:'차가 빨리 돌아 나오는 골목'}],
-    svc:'카카오맵',opt:'큰길우선',q0:4,r0:'많이 쓰는 앱이라서',q1:2,r1:'빠른 길만 보고 신호등 없는 횡단보도는 안 본다',guess:'big',why:'추천 길이 큰길을 따라가고 내 길보다 짧다',w:{fast:2,safe:3,signal:1,big:0.5,familiar:0},
-    rm:{fast:3,safe:1,signal:2,big:4,familiar:5},rt:{fast:2,safe:1,signal:3,big:4,familiar:5},tr:'늦지 않는 것도 중요하지만 어두운 골목은 피하고 싶다',s1:'큰길로 빨리 가는 것',s2:'신호등 있는 횡단보도로 조금 돌아서 간다'});
+    svc:'카카오맵',opt:'큰길우선',q0:4,r0:'많이 쓰는 앱이라서',q1:2,r1:'빠른 길만 보고 신호등 없는 횡단보도는 안 본다',guess:'big',why:'추천 길이 큰길을 따라가고 내 길보다 짧다',w:{fast:3,safe:4,signal:2,big:1,familiar:0},
+    rm:{fast:3,safe:1,signal:2,big:4,familiar:5},rt:{fast:2,safe:1,signal:3,big:4,familiar:5},tr:'늦지 않는 것도 중요하지만 어두운 골목은 피하고 싶다',s1:'짧은 길과 큰길',s2:'신호등 없는 횡단보도가 적은 길로 조금 돌아서 간다'});
 }
 
 /* ===== 교사 화면: 학급 집계 ===== */
