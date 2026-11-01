@@ -1394,13 +1394,13 @@ function gate11a(){const i=S11.info,ok=i.ban&&i.mo&&i.no&&S11.start&&S11.q0;$('#
 function v11b(){
   if(!S11.start)return need11('내 길','1단계에서 출발점을 고르세요.');
   $('#view').innerHTML=`<div class="vh"><h2>내 길</h2></div>
-  <div class="ask">평소 다니는 길을 지도에 그려요. <b>무서운 곳이나 피하는 곳</b>도 찍어요.</div>
-  <div class="split"><div><div class="row" style="margin-bottom:8px"><span class="basebtns" id="mode11"><button data-k="path" aria-pressed="true">길 그리기</button><button data-k="scary" aria-pressed="false">무서운 곳 찍기</button></span>
+  <div class="ask">평소 다니는 길을 지도에 그려요. <b>지나가기 싫은 곳</b>도 찍어요.</div>
+  <div class="split"><div><div class="row" style="margin-bottom:8px"><span class="basebtns" id="mode11"><button data-k="path" aria-pressed="true">길 그리기</button><button data-k="scary" aria-pressed="false">지나가기 싫은 곳 찍기</button></span>
       <button class="btn link" id="undo11">되돌리기</button><button class="btn link" id="clr11">지우기</button><button class="btn link" id="sch11">학교까지 잇기</button></div>
     <div id="map11b" class="map" style="height:58vh"></div><div class="row" style="margin-top:8px">${baseBtns('map11b')}</div></div>
    <div><div class="box"><h3>그린 길</h3><div id="len11" class="hint"></div></div>
-    <div class="box"><h3>무서운 곳 <span class="hint">3곳까지</span></h3><div id="sc11"></div>
-      <label style="display:block;margin-top:8px"><input type="checkbox" id="none11" ${S11.none?'checked':''}> 무서운 곳이 없어요</label></div>
+    <div class="box"><h3>지나가기 싫은 곳 <span class="hint">3곳까지</span></h3><div id="sc11"></div>
+      <label style="display:block;margin-top:8px"><input type="checkbox" id="none11" ${S11.none?'checked':''}> 지나가기 싫은 곳이 없어요</label></div>
     <div id="m11b"></div></div></div>
   <div id="n11b"></div>`;
   const m=maps.b=makeMap('map11b',[S11.start.lat,S11.start.lng],16);bindBases('map11b',m);startMk(m,S11.start);
@@ -1410,11 +1410,11 @@ function v11b(){
     S11.my.forEach(q=>L.circleMarker(ll(q),{radius:4,color:LC.my,fillColor:'#fff',fillOpacity:1,weight:2,interactive:false}).addTo(lay));
     S11.scary.forEach((s,i)=>scaryMk(lay,s,i));list();gate11b();};
   const list=()=>{$('#len11').textContent=S11.my.length?`점 ${S11.my.length}개 · 약 ${Math.round(polyLen(myPath()))}m`:'지도를 눌러 출발점에서 학교까지 점을 이어 가요.';
-    $('#sc11').innerHTML=S11.scary.length?S11.scary.map((s,i)=>`<div class="row" style="margin-bottom:6px"><b>!${i+1}</b><input type="text" class="scw" data-i="${i}" style="flex:1" maxlength="40" placeholder="왜 무서운가요?" value="${esc(s.why)}"><button class="btn link scx" data-i="${i}">빼기</button></div>`).join(''):'<div class="hint">[무서운 곳 찍기]를 누르고 지도를 누르세요.</div>';
+    $('#sc11').innerHTML=S11.scary.length?S11.scary.map((s,i)=>`<div class="row" style="margin-bottom:6px"><b>!${i+1}</b><input type="text" class="scw" data-i="${i}" style="flex:1" maxlength="40" placeholder="왜 싫은가요? 예: 차가 많아서" value="${esc(s.why)}"><button class="btn link scx" data-i="${i}">빼기</button></div>`).join(''):'<div class="hint">[지나가기 싫은 곳 찍기]를 누르고 지도를 누르세요.</div>';
     $$('.scw').forEach(x=>x.oninput=e=>{S11.scary[+x.dataset.i].why=e.target.value;save11();gate11b();});
     $$('.scx').forEach(x=>x.onclick=()=>{S11.scary.splice(+x.dataset.i,1);save11();draw();});};
   m.on('click',e=>{const p=[+e.latlng.lat.toFixed(6),+e.latlng.lng.toFixed(6)];
-    if(mode==='scary'){if(S11.scary.length>=3){$('#m11b').innerHTML='<div class="msg bad">무서운 곳은 3곳까지예요.</div>';return;}S11.scary.push({lat:p[0],lng:p[1],why:''});S11.none=false;$('#none11').checked=false;}
+    if(mode==='scary'){if(S11.scary.length>=3){$('#m11b').innerHTML='<div class="msg bad">지나가기 싫은 곳은 3곳까지예요.</div>';return;}S11.scary.push({lat:p[0],lng:p[1],why:''});S11.none=false;$('#none11').checked=false;}
     else S11.my.push(p);
     $('#m11b').innerHTML='';save11();draw();});
   $('#undo11').onclick=()=>{S11.my.pop();save11();draw();};
@@ -1427,7 +1427,7 @@ function v11b(){
 function ok11b(){const l=S11.my[S11.my.length-1];const path=S11.my.length>=2&&l&&nearSchool(l);const sc=S11.none||(S11.scary.length>0&&S11.scary.every(s=>s.why.trim().length>=2));return{path,sc,ok:path&&sc};}
 function gate11b(){const o=ok11b();let msg='';
   if(S11.my.length>=2&&!o.path)msg='길이 학교까지 닿지 않았어요. [학교까지 잇기]를 눌러도 돼요.';
-  else if(o.path&&!o.sc)msg=S11.scary.length?'무서운 곳마다 이유를 적어 주세요.':'무서운 곳을 찍거나 "없어요"를 고르세요.';
+  else if(o.path&&!o.sc)msg=S11.scary.length?'곳마다 왜 싫은지 적어 주세요.':'지나가기 싫은 곳을 찍거나 "없어요"를 고르세요.';
   if($('#m11b')&&!$('#m11b').innerHTML.includes('3곳'))$('#m11b').innerHTML=msg?`<div class="msg info">${msg}</div>`:'';
   $('#n11b').innerHTML=next11(1,o.ok);bind11(1);}
 
@@ -1503,7 +1503,7 @@ function v11d(){
   $('#view').innerHTML=`<div class="vh"><h2>비교</h2></div>
   <div class="split"><div><div id="map11d" class="map" style="height:56vh"></div>${legend11(['my','ai'])}<div class="row" style="margin-top:8px">${baseBtns('map11d')}</div></div>
    <div><div class="box"><h3>두 길 <span class="hint">길 둘레 ${NEAR_M}m · 공공데이터</span></h3>${cmpTable([{k:'my',t:'내 길',s:st.my},{k:'ai',t:'추천 길',s:st.ai}])}
-     ${S11.scary.length?`<p style="margin:12px 0 0">내 무서운 곳 ${S11.scary.length}곳 중 추천 길 위 <b>${st.so}곳</b></p>`:''}</div></div></div>
+     ${S11.scary.length?`<p style="margin:12px 0 0">내가 지나가기 싫은 곳 ${S11.scary.length}곳 중 추천 길 위 <b>${st.so}곳</b></p>`:''}</div></div></div>
   <div class="box"><div class="ask" style="margin-top:0">추천 길은 무엇을 가장 중요하게 봤을까요?</div>
     <div class="row" id="gs">${GUESS11.map(g=>`<button class="btn ghost" data-k="${g.k}" aria-pressed="${S11.guess===g.k}">${g.t}</button>`).join('')}</div>
     <label style="display:block;margin-top:12px">그렇게 생각한 근거<input type="text" id="why11" style="width:100%;margin-top:4px" maxlength="80" placeholder="표의 숫자나 내 경험으로" value="${esc(S11.why)}"></label></div>
@@ -1604,7 +1604,7 @@ async function card11(shot){
   y=sec(g,920,296,640,300,`두 길 · 둘레 ${NEAR_M}m 공공데이터`);
   g.font=`bold 19px ${FONT}`;g.fillStyle=K.sub;g.fillText('내 길',1240,y-6);g.fillText('추천 길',1400,y-6);
   ROWS11.forEach(([k,t,u],j)=>{const yy=y+24+j*32;g.fillStyle=k==='ns'?K.red:K.ink;g.font=`20px ${FONT}`;g.fillText(t,940,yy);g.font=`bold 20px ${FONT}`;g.fillText(`${st.my[k]}${u}`,1240,yy);g.fillText(`${st.ai[k]}${u}`,1400,yy);});
-  if(S11.scary.length){g.fillStyle=K.ink;g.font=`19px ${FONT}`;g.fillText(`무서운 곳 ${S11.scary.length}곳 중 추천 길 위 ${st.so}곳`,940,y+222);}
+  if(S11.scary.length){g.fillStyle=K.ink;g.font=`19px ${FONT}`;g.fillText(`지나가기 싫은 곳 ${S11.scary.length}곳 중 추천 길 위 ${st.so}곳`,940,y+222);}
   y=sec(g,920,612,640,150,'추천 길이 중요하게 본 것(내 추측)');
   g.fillStyle=K.ink;g.font=`bold 24px ${FONT}`;g.fillText((GUESS11.find(x=>x.k===S11.guess)||{}).t||'',940,y);
   g.font=`19px ${FONT}`;g.fillStyle=K.sub;wrap(g,`근거: ${S11.why.trim()}`,940,y+34,600,26,1);
@@ -1640,7 +1640,7 @@ function teacher11Bind(){
      <tr><th>추천 길이 중요하게 본 것(추측)</th><td>${GUESS11.map(g=>`${g.t} ${A.guess[g.k]}`).join(' · ')}</td></tr>
      <tr><th>평균 내 길 / 추천 길</th><td>${[['len','길이 m'],['cctv','CCTV'],['bell','비상벨'],['ns','신호등 없는 횡단보도'],['cam','단속카메라']].map(([k,t])=>`${t} ${f(A.stat[k].my)} / ${f(A.stat[k].ai)}`).join(' · ')}</td></tr>
      <tr><th>추천 길은 믿을 만한가(4점)</th><td>${A.trust.pairs?`앞 ${f(A.trust.before)} → 뒤 ${f(A.trust.after)} · ${A.trust.pairs}명 중 낮아짐 ${A.trust.down} · 그대로 ${A.trust.same} · 높아짐 ${A.trust.up}`:'앞뒤 모두 답한 코드 없음'}</td></tr>
-     <tr><th>무서운 곳</th><td>${A.scary}곳 중 추천 길 위 ${A.scaryOnAi}곳</td></tr></table>`;};
+     <tr><th>지나가기 싫은 곳</th><td>${A.scary}곳 중 추천 길 위 ${A.scaryOnAi}곳</td></tr></table>`;};
 }
 
 /* 통학로 진단 · W13-1 문제 정의 (위 띠 S). 설계: docs/SPARK-LAB-시리즈-설계.md 6장 2번.
