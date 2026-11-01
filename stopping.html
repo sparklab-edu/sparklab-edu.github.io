@@ -921,7 +921,7 @@ textarea[placeholder^="SPARK"],.code{word-break:break-all}
 <script>/* SPARK LAB 모둠 코드(SPARK-TEAM). 모든 앱이 build.py로 이 파일을 함께 넣는다.
    형식: docs/SPARK-LAB-시리즈-설계.md 4장. node 시험이 vm으로 읽으므로 전역은 var·function으로만 둔다. */
 var TEAM_PREFIX='SPARK-TEAM:', TEAM_STAR_PREFIX='SPARK-STAR:', TEAM_V=1;
-var TEAM_STEP={s:'W9-1 통학로 진단을',t:'W9-2 정지거리 측정을',o:'W13 문제 정의를',r:'W18~19 반복 테스트를'};
+var TEAM_STEP={s:'통학로 진단을',t:'정지거리 측정을',o:'문제 정의를',r:'반복 테스트를'};
 var TEAM_CUT='코드가 중간에 잘렸어요. AI 교수·학습 플랫폼에서 다시 통째로 복사해 주세요.';
 function teamB64(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 function teamUnb64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))));}
@@ -1461,7 +1461,7 @@ async function cardP(){
   let y=sec(g,40,156,500,300,`빠름 단계 · T = ${T0}cm`);
   g.fillStyle=K.sub;g.font=`20px ${FONT}`;g.fillText('예측: 벽까지',60,y);
   g.fillStyle=K.ink;g.font=`bold 36px ${FONT}`;g.fillText(`${S.s2.pred}cm`,60,y+46);
-  g.fillStyle=K.sub;g.font=`20px ${FONT}`;g.fillText('실측: 벽까지 남은 거리 g',60,y+100);
+  g.fillStyle=K.sub;g.font=`20px ${FONT}`;g.fillText('측정: 벽까지 남은 거리 g',60,y+100);
   g.fillStyle=K.ink;g.font=`bold 36px ${FONT}`;g.fillText(d[2].map(v=>v<0?'충돌':`${+(T0-v).toFixed(1)}cm`).join(' · '),60,y+146);
   // 왼쪽 아래: ★과 모둠 빠름 단계
   y=sec(g,40,472,500,476,'★ 순찰 지역');
