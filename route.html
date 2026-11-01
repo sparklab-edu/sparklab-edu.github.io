@@ -845,7 +845,7 @@ table.dt tr.sel td{background:#e7eef8}
 .find{display:flex;gap:12px;align-items:baseline;border-top:1px solid #eceeea;padding:9px 0;font-size:14px}
 .find:first-child{border-top:none}
 .find .tag{flex:none;font-size:12.5px;font-weight:700;padding:1px 0;min-width:3.6em;border-bottom:3px solid var(--line)}
-.find .act-hide{border-color:var(--faint)}.find .act-fix{border-color:var(--ok)}.find .act-keep{border-color:var(--zone)}
+.find .act-hide{border-color:var(--faint)}.find .act-fix{border-color:var(--ok)}.find .act-keep{border-color:var(--zone)}.find .act-col{border-color:var(--asphalt)}
 .find .x{margin-left:auto;flex:none;white-space:nowrap;border:none;background:none;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:13px}
 
 .map{height:56vh;min-height:380px;border-radius:5px;border:1px solid var(--line)}
@@ -2033,7 +2033,7 @@ function sampleP(){
   const pick=places.findIndex(p=>!p[0]&&p[4]==='14'),pt=[places[pick][1],places[pick][2]],c=proCount(G,pt);
   return Object.assign(freshP(),{step:2,max:2,info:{ban:'3',mo:'2'},places,pick,
     t:'별내동 순화궁로 골목 입구에 차량 속도를 줄이는 시설을 설치해 주세요',where:'순화궁로에서 학교 쪽으로 꺾이는 골목 입구',
-    now:`모둠 4명 중 2명이 차가 빨리 돌아 나와서 지나가기 싫다고 했다. 공공데이터로 보면 둘레 ${PRO_M}m에 CCTV ${c.cctv}대, 비상벨 ${c.bell}개, 신호등 없는 횡단보도 ${c.ns}곳이 있다.`,
+    now:`모둠원 두 명이 차가 빨리 돌아 나와서 지나가기 싫다고 했다. 공공데이터로 보면 둘레 ${PRO_M}m에 CCTV ${c.cctv}대, 비상벨 ${c.bell}개, 신호등 없는 횡단보도 ${c.ns}곳이 있다.`,
     fix:'골목 입구에 과속방지턱과 "어린이 통학로" 노면 표시를 설치한다',eff:'등굣길 학생들이 골목 입구를 건널 때 차가 천천히 와서 덜 위험하다'});
 }
 
@@ -2629,7 +2629,7 @@ function form3(){
 }
 function findText(f){
   const d=S.ds;
-  if(f.kind==='col')return{what:`열 '${d.headers[f.col]}' 전체`,act:'둔다'};
+  if(f.kind==='col')return{what:`열 '${d.headers[f.col]}'`,act:'열 전체'};
   const what=f.rows.length===1?`${f.rows[0]+1}행`:`${f.rows.length}개 행 (${f.rows.slice(0,3).map(r=>r+1).join(', ')}${f.rows.length>3?'…':''}행)`;
   const act={keep:'둔다',hide:'숨긴다',fix:'고친다'}[f.act]+(f.act==='fix'?` · ${d.headers[f.fix.c]}: ${f.fix.old||'(빈칸)'} → ${f.fix.val||'(빈칸)'}`:'');
   return{what,act};
@@ -2637,7 +2637,7 @@ function findText(f){
 function drawFinds(){
   const el=$('#finds');
   if(!S.s3.find.length){el.innerHTML='<div class="hint">아직 없어요.</div>';return;}
-  el.innerHTML=S.s3.find.map((f,i)=>{const t=findText(f);return `<div class="find"><span class="tag act-${f.kind==='col'?'keep':f.act}">${esc(t.act.split(' · ')[0])}</span><div><b>${esc(t.what)}</b> · ${esc(f.reason)}${t.act.includes(' · ')?`<div class="hint">${esc(t.act.split(' · ').slice(1).join(' · '))}</div>`:''}</div><button class="x" data-i="${i}">지우기</button></div>`;}).join('');
+  el.innerHTML=S.s3.find.map((f,i)=>{const t=findText(f);return `<div class="find"><span class="tag act-${f.kind==='col'?'col':f.act}">${esc(t.act.split(' · ')[0])}</span><div><b>${esc(t.what)}</b> · ${esc(f.reason)}${t.act.includes(' · ')?`<div class="hint">${esc(t.act.split(' · ').slice(1).join(' · '))}</div>`:''}</div><button class="x" data-i="${i}">지우기</button></div>`;}).join('');
   $$('#finds .x').forEach(b=>b.onclick=()=>{S.s3.find.splice(+b.dataset.i,1);save();draw3();drawFinds();gate3();});
 }
 function gate3(){const ok=S.s3.find.length>0;$('#n3').innerHTML=nextBtn(2,ok);bindNext(2);}
