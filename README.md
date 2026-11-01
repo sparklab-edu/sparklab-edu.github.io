@@ -11,3 +11,4 @@
 
 주소 끝 `#sample` = 저장하지 않는 완성 예시. 지도: © OpenStreetMap 기여자(ODbL). 글꼴: IBM Plex Sans KR(OFL).
 | `ai.html` | 수업 슬라이드: AI 추천은 누구의 기준인가(11/2 주) |
+| `createai.html` | 수업 슬라이드: 인공지능의 학습(CreateAI, 11/2 주 둘째 시간) |
