@@ -1105,12 +1105,14 @@ function sec(g,x,y,w,h,title){g.fillStyle=K.well;g.beginPath();g.roundRect(x,y,w
 function loadImg(src){return new Promise(r=>{if(!src)return r(null);const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);im.src=src;});}
 
 /* 카드 미리보기 + [이미지 복사]·[이미지 저장], 코드 복사 */
-function showCard(sel,cv,name){
+/* 학번: 1학년 + 반 두 자리 + 번호 두 자리 (1반 13번 → 10113) */
+function stuId(ban,no){const b=parseInt(ban,10),n=parseInt(no,10);return b>0&&n>0?`1${String(b).padStart(2,'0')}${String(n).padStart(2,'0')}`:'';}
+function showCard(sel,cv,name,id){
   const url=cv.toDataURL('image/png');
   $(sel).innerHTML=`<img class="cardprev" src="${url}" alt="${name} 미리보기"><div class="row" style="margin-top:10px"><button class="btn sign">${name} 이미지 복사</button><button class="btn ghost save">이미지 저장</button><span class="hint"></span></div><div class="fallback" hidden><div class="msg info">그림을 <b>오른쪽 클릭 → 이미지 복사</b> 하세요.</div><img src="${url}" alt="${name}"></div>`;
   const b=$(sel+' .btn'),m=$(sel+' .row .hint'),fb=$(sel+' .fallback');
   b.onclick=async()=>{try{const blob=await new Promise(r=>cv.toBlob(r,'image/png'));await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);m.textContent='복사했어요. AI 교수·학습 플랫폼에서 Ctrl+V';}catch(e){fb.hidden=false;m.textContent='';}};
-  $(sel+' .save').onclick=()=>{const a=document.createElement('a');a.href=url;a.download=`SPARK-LAB_${name.replace(/\s+/g,'_')}.png`;document.body.appendChild(a);a.click();a.remove();m.textContent='다운로드 폴더에 저장했어요. AI 교수·학습 플랫폼에서 파일로 올리세요.';};
+  $(sel+' .save').onclick=()=>{const a=document.createElement('a');a.href=url;a.download=`${id?id+'_':''}${name.replace(/\s+/g,'_')}.png`;document.body.appendChild(a);a.click();a.remove();m.textContent='다운로드 폴더에 저장했어요. AI 교수·학습 플랫폼에서 파일로 올리세요.';};
 }
 async function copyText(t,msgEl,boxEl){
   try{await navigator.clipboard.writeText(t);msgEl.textContent='복사했어요.';}
@@ -1668,7 +1670,7 @@ function v11f(){
   let shot=null,tm=null;
   const make=async()=>{const k=code11();$('#k11').textContent=k;
     if(!(S11.s1.trim()&&S11.s2.trim()&&S11.q1&&S11.r1.trim().length>=2)){$('#c11').innerHTML='<div class="hint">위 질문에 답하고 문장 두 칸을 채우면 만들어져요.</div>';return;}
-    if(!shot)return;showCard('#c11',await card11(shot),'경로 비교 카드');done11(4);if(S11.max<5){S11.max=5;save11();rail11();}};
+    if(!shot)return;showCard('#c11',await card11(shot),'경로 비교 카드',stuId(S11.info.ban,S11.info.no));done11(4);if(S11.max<5){S11.max=5;save11();rail11();}};
   const upd=()=>{save11();clearTimeout(tm);tm=setTimeout(make,400);};
   bindTrust('q1',upd);$('#r1').oninput=e=>{S11.r1=e.target.value;upd();};
   $('#s1').oninput=e=>{S11.s1=e.target.value;upd();};$('#s2').oninput=e=>{S11.s2=e.target.value;upd();};
@@ -1903,7 +1905,7 @@ function v13e(){
     const cv=snap(m,(g,mm)=>{all13().forEach(p=>{const q=mm.latLngToContainerPoint([p.lat,p.lng]);if(q.x<-10||q.y<-10||q.x>g.canvas.width+10||q.y>g.canvas.height+10)return;dot(g,q.x,q.y,6,META[KIND13[p.종류]].color,false);});drawSchool(g,mm);drawStar(g,mm,{lat:s.y,lng:s.x},s.r||100);S13.diff.forEach((d,i)=>drawDiff(g,mm,d,i));});
     try{S13.card=cv.toDataURL('image/jpeg',0.86);}catch(e){S13.card=null;}
     save13();if(maps.e!==m)return;
-    $('#sm13').innerHTML='';showCard('#c13',await card13(),'문제정의 카드');
+    $('#sm13').innerHTML='';{const t=team13();showCard('#c13',await card13(),'문제정의 카드',t?`${t.b}반${t.m}모둠`:'');}
   },1800);
 }
 async function card13(){
@@ -2951,8 +2953,8 @@ async function view7(){
   const make=async()=>{
     const a=ok1&&ok7a(),b=ok2&&ok7b();
     $('#m7').textContent=(ok1&&!ok7a())||(ok2&&!ok7b())?'빈칸을 채우면 그 카드가 만들어져요.':'';
-    if(a){const cv=await card1();showCard('#c1',cv,'카드 ①');}
-    if(b){const cv=await card2();showCard('#c2',cv,'카드 ②');}
+    if(a){const cv=await card1();showCard('#c1',cv,'카드 ①',stuId(S.info.ban,S.info.no));}
+    if(b){const cv=await card2();showCard('#c2',cv,'카드 ②',stuId(S.info.ban,S.info.no));}
   };
   $('#mk7').onclick=make;
   $('#view').insertAdjacentHTML('beforeend',nextBtn(6,true));bindNext(6);
@@ -3011,7 +3013,7 @@ function view8(){
   $('#ck8').onclick=()=>{const bad=check8(src,t);t.ok=!bad.length;save();$('#m8').innerHTML=bad.length?bad.map(b=>`<div class="msg bad">${esc(b)}</div>`).join(''):'<div class="msg ok">표를 다 채웠어요. 이제 다이어그램을 골라 보세요.</div>';$('#d8').hidden=!t.ok;};
   $$('#d8 [data-k]').forEach(b=>b.onclick=()=>{t.kind=b.dataset.k;save();$$('#d8 [data-k]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
   $('#why8').oninput=e=>{t.why=e.target.value;save();};
-  const make=async()=>{if(check8(src,t).length){t.ok=false;save();$('#d8').hidden=true;return;}if(!t.kind||t.why.trim().length<2){$('#mm8').textContent='다이어그램을 고르고 이유를 쓰면 만들어져요.';return;}$('#mm8').textContent='';const cv=await card8(src);showCard('#c8',cv,'카드 ③');};
+  const make=async()=>{if(check8(src,t).length){t.ok=false;save();$('#d8').hidden=true;return;}if(!t.kind||t.why.trim().length<2){$('#mm8').textContent='다이어그램을 고르고 이유를 쓰면 만들어져요.';return;}$('#mm8').textContent='';const cv=await card8(src);showCard('#c8',cv,'카드 ③',stuId(S.info.ban,S.info.no));};
   $('#mk8').onclick=make;if(t.ok&&t.kind&&t.why.trim().length>1)make();
   if(S.max<7){S.max=7;save();rail();}
 }
