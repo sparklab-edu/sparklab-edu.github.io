@@ -818,7 +818,7 @@ table.dt tr.sel td{background:#e7eef8}
 .find{display:flex;gap:12px;align-items:baseline;border-top:1px solid #eceeea;padding:9px 0;font-size:14px}
 .find:first-child{border-top:none}
 .find .tag{flex:none;font-size:12.5px;font-weight:700;padding:1px 0;min-width:3.6em;border-bottom:3px solid var(--line)}
-.find .act-hide{border-color:var(--faint)}.find .act-fix{border-color:var(--ok)}.find .act-keep{border-color:var(--zone)}
+.find .act-hide{border-color:var(--faint)}.find .act-fix{border-color:var(--ok)}.find .act-keep{border-color:var(--zone)}.find .act-col{border-color:var(--asphalt)}
 .find .x{margin-left:auto;flex:none;white-space:nowrap;border:none;background:none;color:var(--sub);text-decoration:underline;cursor:pointer;font-size:13px}
 
 .map{height:56vh;min-height:380px;border-radius:5px;border:1px solid var(--line)}
@@ -1082,12 +1082,13 @@ function cardFrame(g,o){
 function sec(g,x,y,w,h,title){g.fillStyle=K.well;g.beginPath();g.roundRect(x,y,w,h,6);g.fill();g.fillStyle=K.sub;g.font=`bold 20px ${FONT}`;g.fillText(title,x+20,y+34);return y+70;}
 function loadImg(src){return new Promise(r=>{if(!src)return r(null);const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);im.src=src;});}
 
-/* 카드 미리보기 + [이미지 복사], 코드 복사 */
+/* 카드 미리보기 + [이미지 복사]·[이미지 저장], 코드 복사 */
 function showCard(sel,cv,name){
   const url=cv.toDataURL('image/png');
-  $(sel).innerHTML=`<img class="cardprev" src="${url}" alt="${name} 미리보기"><div class="row" style="margin-top:10px"><button class="btn sign">${name} 이미지 복사</button><span class="hint"></span></div><div class="fallback" hidden><div class="msg info">그림을 <b>오른쪽 클릭 → 이미지 복사</b> 하세요.</div><img src="${url}" alt="${name}"></div>`;
+  $(sel).innerHTML=`<img class="cardprev" src="${url}" alt="${name} 미리보기"><div class="row" style="margin-top:10px"><button class="btn sign">${name} 이미지 복사</button><button class="btn ghost save">이미지 저장</button><span class="hint"></span></div><div class="fallback" hidden><div class="msg info">그림을 <b>오른쪽 클릭 → 이미지 복사</b> 하세요.</div><img src="${url}" alt="${name}"></div>`;
   const b=$(sel+' .btn'),m=$(sel+' .row .hint'),fb=$(sel+' .fallback');
   b.onclick=async()=>{try{const blob=await new Promise(r=>cv.toBlob(r,'image/png'));await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);m.textContent='복사했어요. AI 교수·학습 플랫폼에서 Ctrl+V';}catch(e){fb.hidden=false;m.textContent='';}};
+  $(sel+' .save').onclick=()=>{const a=document.createElement('a');a.href=url;a.download=`SPARK-LAB_${name.replace(/\s+/g,'_')}.png`;document.body.appendChild(a);a.click();a.remove();m.textContent='다운로드 폴더에 저장했어요. AI 교수·학습 플랫폼에서 파일로 올리세요.';};
 }
 async function copyText(t,msgEl,boxEl){
   try{await navigator.clipboard.writeText(t);msgEl.textContent='복사했어요.';}
