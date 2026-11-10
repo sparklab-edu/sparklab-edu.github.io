@@ -88,6 +88,8 @@ svg text{font-family:var(--font)}
 .go{flex:none;display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
 .go a{display:inline-flex;align-items:baseline;gap:14px;background:var(--zone);color:var(--ink);font-weight:700;font-size:30px;line-height:1.2;padding:12px 24px;border-radius:6px;text-decoration:none}
 .go a span{font-weight:400;font-size:24px}
+.go button{font:inherit;display:inline-flex;align-items:baseline;gap:14px;background:var(--zone);color:var(--ink);font-weight:700;font-size:30px;line-height:1.2;padding:12px 24px;border-radius:6px;border:0;cursor:pointer}
+.go button span{font-weight:400;font-size:24px}
 .act .task .src{background:var(--well);border-left:6px solid var(--asph);padding:12px 20px;margin-bottom:12px;font-size:28px}
 .act .task ol{margin:0;padding-left:50px;flex:1;display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;min-height:0}
 .timer{background:var(--asph);color:#fff;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;user-select:none}
@@ -137,7 +139,7 @@ svg .fadev{opacity:0;transition:opacity .4s .6s}svg .fadev.on{opacity:1}
 <div id="ov"><div class="g"></div></div>
 <div id="notes"></div>
 <div id="hint">← → 넘기기 · O 목록 · N 노트 · T 타이머 · F 전체 화면</div>
-<script id="deck" type="application/json">{"title": "순찰 로봇의 판단", "lit": [2], "slides": [{"type": "title", "title": "알아보는데,\n왜 아무것도 안 할까?", "sub": "순찰 로봇의 판단"}, {"type": "activity", "h": "모델을 마퀸에 올리기", "minutes": 12, "task": ["**짝마다** 우리 모델 열기 → **[Edit in MakeCode]**", "**[확장]**에서 **maqueen** 찾아 추가", "다운로드 → 마퀸에 꽂고 **세 동작** 해 보기"], "note": "로봇이 무엇을 하는지 보기", "go": [{"label": "CreateAI 열기", "url": "https://createai.microbit.org/"}]}, {"type": "ask", "q": "로봇이 알아봤다.\n그런데 왜 가만히 있을까?"}, {"type": "text", "h": "에이전트: 인식 · 판단 · 행동", "steps": true, "points": ["**인식**(입력) · 센서와 모델로 무슨 일인지 알아본다", "**판단**(처리) · **목표**에 맞게 무엇을 할지 정한다", "**행동**(출력) · 바퀴 · 소리 · 불빛으로 움직인다"], "note": "**에이전트** = 스스로 알아보고, 정하고, 움직이는 **인공지능 시스템**", "flow": ["가속도 센서", "모델: 부딪힘", "*판단 ?", "모터"]}, {"type": "text", "h": "판단부 쓰는 법", "points": ["**판단** = 이 **상황**이면 → 이 **행동**", "**행동** · 움직이기 · 멈추기 · 빠르기 · 소리 · 불빛", "**블록** · '알아봤을 때' 블록 안에 **행동 블록만** 넣기"], "note": "**목표** · 사람과 로봇이 안전하게, 순찰은 계속"}, {"type": "activity", "h": "판단부 채우기 v1", "minutes": 10, "task": ["세 상황에서 로봇이 **무엇을 할지** 정하기", "**왜** 그렇게 정했는지 활동지 **①**에 쓰기", "**두 마퀸에** 같은 **행동** 넣기"], "note": "주행 · 부딪힘 · 들어 올림, 세 칸"}, {"type": "activity", "h": "시험하고 고치기 v2", "minutes": 13, "task": ["**두 마퀸으로** 세 동작 시험하기", "이상한 판단 **하나** 찾기", "**왜 그랬을지** 모둠에서 이야기하기", "활동지 **②·③**에 v2 쓰기"]}, {"type": "ask", "q": "오늘 로봇의 판단은 누가 정했을까?\n그 판단을 믿을 수 있을까?", "sub": "마무리 카드에 쓰기"}]}</script>
+<script id="deck" type="application/json">{"title": "순찰 로봇의 판단 규칙 설계", "lit": [2], "slides": [{"type": "title", "title": "알아보는데,\n왜 아무것도 안 할까?", "sub": "순찰 로봇의 판단 규칙 설계"}, {"type": "activity", "h": "모델을 마퀸에 넣기", "minutes": 12, "task": ["짝마다 우리 모델 파일을 열고 **[Edit in MakeCode]** 누르기", "**[확장]**에서 maqueen을 찾아 추가하기", "내려받아 마퀸에 꽂고, 세 가지 움직임 해 보기"], "note": "로봇이 무엇을 하는지 살펴보기", "go": [{"label": "CreateAI 열기", "url": "https://createai.microbit.org/"}]}, {"type": "ask", "q": "로봇은 무슨 일인지 알아봤다.\n그런데 왜 가만히 있을까?"}, {"type": "text", "h": "인식, 판단, 행동", "steps": true, "points": ["**인식**(입력)은 센서와 모델로 무슨 일인지 알아내는 일이다", "**판단**(처리)은 목표에 맞게 무엇을 할지 정하는 일이다", "**행동**(출력)은 바퀴, 소리, 불빛으로 움직이는 일이다"], "note": "세 부분을 갖추고 스스로 움직이는 인공지능 시스템을 **에이전트**라고 한다", "flow": ["가속도 센서", "모델 (부딪힘)", "*판단 ?", "모터"]}, {"type": "text", "h": "판단 규칙 만들기", "points": ["**판단 규칙**은 어떤 상황에서 어떤 행동을 할지 정한 것이다", "쓸 수 있는 행동은 움직이기, 멈추기, 빠르기, 소리, 불빛이다", "'알아봤을 때' 블록 안에 **행동 블록만** 넣는다"], "note": "목표는 사람과 로봇이 모두 안전하면서 순찰을 계속하는 것이다"}, {"type": "activity", "h": "처음 판단 규칙 정하기", "minutes": 10, "task": ["세 상황에서 로봇이 할 행동을 모둠이 정하기", "정한 행동과 이유를 활동지 ①에 쓰기", "두 마퀸에 같은 행동 블록 넣기"], "note": "세 상황은 주행, 부딪힘, 들어 올림이다"}, {"type": "activity", "h": "시험하고 판단 규칙 고치기", "minutes": 13, "task": ["두 마퀸으로 세 가지 움직임 시험하기", "이상한 판단 한 가지를 활동지 ②에 쓰기", "왜 그랬을지 모둠에서 이야기하기", "고친 규칙을 활동지 ③에 쓰고 마퀸에 넣기"]}, {"type": "ask", "q": "오늘 로봇의 판단은 누가 정했을까?\n그 판단을 믿을 수 있을까?", "sub": "마무리 카드에 쓰기"}]}</script>
 <script>
 const D=JSON.parse(document.getElementById('deck').textContent);
 const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
@@ -172,7 +174,8 @@ function graph(g){const W=1120,H=400;let s='',ed='';const P={};g.nodes.forEach(n
 function tableHTML(t){return `<table class="t"><thead><tr>${t.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${t.rows.map(r=>`<tr class="${r.sum?'sum':''}">${r.cells.map((c,i)=>`<td class="${i?'n':''}">${i===0&&r.color?`<span class="dot" style="background:${col(r.color)}"></span>`:''}${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;}
 
 /* 실습 바로 가기: 쪽의 go = [{label, url}] → 노랑 버튼(새 탭) + 학생이 칠 수 있게 주소 */
-function goHTML(s){return s.go?`<div class="go">${s.go.map(g=>`<a href="${esc(g.url)}" target="_blank" rel="noopener">${esc(g.label)}<span>${esc(g.url.replace(/^https?:\/\//,'').replace(/\/$/,''))}</span></a>`).join('')}</div>`:'';}
+/* 복사 버튼: 쪽의 copy = [{label, text}] → 누르면 text를 클립보드에(학생 PC에서 연 슬라이드에서 질문 틀을 복사) */
+function goHTML(s){if(!s.go&&!s.copy)return '';return `<div class="go">${(s.copy||[]).map((c,j)=>`<button type="button" data-copy="${j}">${esc(c.label)}<span>누르면 복사</span></button>`).join('')}${(s.go||[]).map(g=>`<a href="${esc(g.url)}" target="_blank" rel="noopener">${esc(g.label)}<span>${esc(g.url.replace(/^https?:\/\//,'').replace(/\/$/,''))}</span></a>`).join('')}</div>`;}
 /* 쪽 그리기 */
 const R={
   title:s=>`<div class="body"><h1>${md(s.title)}</h1><div class="sub">${md(s.sub||'')}</div>${s.meta?`<div class="meta">${md(s.meta)}</div>`:''}</div>`,
@@ -222,6 +225,8 @@ const HOOK={
   answer:(sec,s,st)=>{const f=$('.fig',sec);if(st>=1&&f.dataset.done!=='1'){f.dataset.done='1';f.dataset.pie='1';playFig(f,s.data,{unit:s.unit});}if(st<1)f.dataset.done='0';},
 };
 $$('.card').forEach(c=>c.onclick=e=>{e.stopPropagation();c.classList.toggle('open');});
+function copyText(t){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(t);const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();return Promise.resolve();}
+$$('[data-copy]').forEach(b=>b.onclick=e=>{e.stopPropagation();const s=D.slides[+b.closest('.slide').dataset.i],sp=$('span',b);copyText(s.copy[+b.dataset.copy].text).then(()=>{sp.textContent='복사했어요';setTimeout(()=>sp.textContent='누르면 복사',2000);});});
 // 타이머
 let tm=null;function timer(el){if(!el)return;if(tm){clearInterval(tm.id);const same=tm.el===el;tm=null;if(same)return;}let left=+el.dataset.min*60;const m=$('.m',el);el.classList.remove('end');
   tm={el,id:setInterval(()=>{left--;m.textContent=`${String(Math.floor(Math.max(left,0)/60)).padStart(2,'0')}:${String(Math.max(left,0)%60).padStart(2,'0')}`;if(left<=0){clearInterval(tm.id);tm=null;el.classList.add('end');}},1000)};}
@@ -241,7 +246,7 @@ $$('#ov button').forEach(b=>b.onclick=()=>{show(+b.dataset.i);$('#ov').classList
 document.addEventListener('keydown',e=>{const k=e.key;if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();next();}else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();prev();}
   else if(k==='Home')show(0);else if(k==='End')show(D.slides.length-1);else if(k==='o'||k==='O')$('#ov').classList.toggle('on');else if(k==='Escape')$('#ov').classList.remove('on');
   else if(k==='n'||k==='N')$('#notes').classList.toggle('on');else if(k==='t'||k==='T')timer($('.slide.on .timer'));else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}});
-stage.addEventListener('click',e=>{if(e.target.closest('a'))return;if(document.documentElement.classList.contains('mob'))return;const r=stage.getBoundingClientRect();(e.clientX-r.left)>r.width/3?next():prev();});
+stage.addEventListener('click',e=>{if(e.target.closest('a,button'))return;if(document.documentElement.classList.contains('mob'))return;const r=stage.getBoundingClientRect();(e.clientX-r.left)>r.width/3?next():prev();});
 // 화면 크기에 맞춤. 휴대폰 세로(폭 < 700)는 쪽을 위아래로 늘어놓고 폭에 맞춰 줄인다(스크롤로 훑어보기).
 function fit(){const mob=innerWidth<700&&innerHeight>innerWidth;document.documentElement.classList.toggle('mob',mob);
   if(mob){stage.style.transform='';stage.style.zoom=innerWidth/1280;}else{stage.style.zoom='';stage.style.transform=`translate(-50%,-50%) scale(${Math.min(innerWidth/1280,innerHeight/720)})`;}}
