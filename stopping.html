@@ -1202,6 +1202,12 @@ function checkRun(T,g,bd,hit){
   if(Math.abs(B-(T-G))>0.05)return{ok:false,msg:'T − g를 다시 계산해 보세요.'};
   return{ok:true,msg:''};
 }
+// 다른 컴퓨터에서 이어 하기: 측정 코드의 제동거리(d)로 3단계 표를 되살린다(g = T − 제동거리)
+function dToS3(d,T){
+  const s3={g:[],bd:[],hit:[],ok:true};
+  d.forEach((row,a)=>{s3.g[a]=[];s3.bd[a]=[];s3.hit[a]=[];row.forEach((v,r)=>{const h=v<0;s3.hit[a][r]=h;s3.g[a][r]=h?'':String(+(T-v).toFixed(1));s3.bd[a][r]=h?'':String(v);});});
+  return s3;
+}
 function runsToD(s3,T){return [0,1,2].map(a=>[0,1,2].map(r=>s3.hit[a][r]?-1:+(T-Number(s3.g[a][r])).toFixed(1)));}
 
 function pCodeEnc(o){return codeEnc(P_PREFIX,{v:1,b:String(o.b),m:String(o.m),n:String(o.n),d:o.d,p:o.p,...(o.w?{w:o.w}:{})});}
@@ -1241,17 +1247,27 @@ function pFast(G){
   const vals=[];let hits=0;
   Object.values(G).forEach(d=>d[2].forEach(v=>{if(v<0)hits++;else vals.push(v);}));
   const mean=vals.length?+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):null;
-  return{n:vals.length+hits,vals,hits,mean,max:vals.length?Math.max(...vals):null};
+  return{n:vals.length+hits,vals,hits,mean,med:pMedian(vals,hits),max:vals.length?Math.max(...vals):null};
+}
+// 중앙값: 충돌은 20cm 안에 못 멈춘 것이라 어떤 측정값보다 길다고 보고 맨 뒤에 세운다. 가운데가 충돌이면 null
+function pMedian(vals,hits){
+  const a=[...vals].sort((x,y)=>x-y).concat(Array(hits).fill(Infinity)),n=a.length;
+  if(!n)return null;
+  const m=n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2;
+  return isFinite(m)?+m.toFixed(1):null;
 }
 // T로 정했을 때 부딪히는 횟수: 제동거리가 T보다 긴 측정 + 충돌(실험 때 20cm 안에 못 멈춘 것)
 function hitsAt(f,T){return f.vals.filter(v=>v>T).length+f.hits;}
-function repValue(f,rep){return rep==='max'?f.max:rep==='mean'?f.mean:null;}
+function repValue(f,rep){return rep==='max'?f.max:rep==='mean'?f.mean:rep==='med'?f.med:null;}
+var REP_NAME={mean:'평균',med:'중앙값',max:'최댓값'};
 function checkT(f,rep,mg,t){
   const M=pNum(mg),Tn=pNum(t);
   if(!rep||M===null||Tn===null)return{ok:false,msg:''};
   if(M<0)return{ok:false,msg:'여유는 0cm 이상이에요.'};
   if(!f.vals.length)return Tn===40?{ok:true,msg:''}:{ok:false,msg:'빠름 단계가 모두 충돌이에요. T를 가장 길게(40cm) 해 볼까요?'};
-  const base=repValue(f,rep),need=+(base+M).toFixed(1);
+  const base=repValue(f,rep);
+  if(base==null)return{ok:false,msg:'중앙값이 충돌이에요. 절반 넘게 20cm 안에 멈추지 못했어요. 다른 대표값을 골라 볼까요?'};
+  const need=+(base+M).toFixed(1);
   if(Tn<base)return{ok:false,msg:`새 T가 대표값 ${base}cm보다 짧아요. 빠름 단계에서 부딪혀요.`};
   if(need>40&&Tn===40)return{ok:true,msg:'마퀸 코드는 40cm까지예요. 여유가 모자라면 속도를 줄여야 할까요?'};
   if(Tn<need)return{ok:false,msg:`여유 ${M}cm를 더하면 T는 ${need}cm 이상이어야 해요.`};
@@ -1292,7 +1308,7 @@ function myD(){return runsToD(S.s3,T0);}
 // 모둠원 먼저, 내 측정은 마지막(번호가 겹쳐도 내 측정이 남는다)
 function groupD(){const G={};for(const [n,o] of Object.entries(S.s5.mem))G[n]=o.d;G[S.info.no]=myD();return G;}
 function myIdx(){return Object.keys(groupD()).indexOf(String(S.info.no));}
-function baseText(rep,base){return base==null?'빠름 단계 모두 충돌':`${rep==='max'?'최댓값':'평균'} ${base}cm`;}
+function baseText(rep,base){return base==null?'빠름 단계 모두 충돌':`${REP_NAME[rep]||'평균'} ${base}cm`;}
 const NEED3='<div class="msg bad">3단계 측정을 다시 확인해 주세요.</div>';
 function myPCode(){const i=S.info;return pCodeEnc({b:i.ban,m:i.mo,n:i.no,d:myD(),p:pNum(S.s2.pred),w:S.s7.why||S.s7.from||S.s7.to?{why:S.s7.why,from:S.s7.from,to:S.s7.to}:null});}
 function colorOf(c){return c<0?'#24282c':PAL[c%PAL.length];}
@@ -1392,6 +1408,7 @@ function view3(){
       <td class="fb3"></td></tr>`;}
   $('#view').innerHTML=`
   <div class="vh"><h2>측정</h2></div>
+  ${s.ok?'':`<details class="box"><summary>다른 컴퓨터에서 측정했어요</summary><textarea id="rp3" rows="2" placeholder="SPARK-P:…" style="margin-top:10px"></textarea><div class="row" style="margin-top:8px"><button class="btn ghost" id="rpg3">내 측정 불러오기</button></div><div id="rpm3"></div></details>`}
   <div class="box"><p style="margin:0 0 12px">T = <b>${T0}cm</b> · 벽 앞 1m에서 출발 · 부딪히면 충돌</p>
     <div class="tw" style="max-height:none"><table class="dt meas"><thead><tr><th class="nosort">속도</th><th class="nosort">회</th><th class="nosort">남은 거리 g (cm)</th><th class="nosort"></th><th class="nosort">제동거리 T − g (cm)</th><th class="nosort"></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="row" style="margin-top:12px"><button class="btn" id="ck3">확인</button></div><div id="m3"></div>
@@ -1402,7 +1419,18 @@ function view3(){
     $('.bd',tr).oninput=e=>{s.bd[a][r]=e.target.value;s.ok=false;save();gate3();};
     $('.hit',tr).onchange=e=>{s.hit[a][r]=e.target.checked;if(e.target.checked){s.g[a][r]='';s.bd[a][r]='';}s.ok=false;save();view3();};});
   $('#ck3').onclick=check3;
+  const rb=$('#rpg3');if(rb)rb.onclick=restore3;
   if(s.ok)check3();else gate3();
+}
+// 다른 컴퓨터에서 이어 하기: 내 측정 코드(반·모둠·번호가 같아야 함)로 측정표와 예측을 되살린다
+function restore3(){
+  const m=$('#rpm3'),i=S.info;let o;
+  try{o=pCodeDec($('#rp3').value);}catch(e){m.innerHTML=`<div class="msg bad">${esc(e.message)}</div>`;return;}
+  if(o.b!==String(i.ban)||o.m!==String(i.mo)||o.n!==String(i.no)){m.innerHTML=`<div class="msg bad">${esc(o.b)}반 ${esc(o.m)}모둠 ${esc(o.n)}번의 코드예요. 1단계의 반·모둠·번호와 같은 내 코드를 넣어 주세요.</div>`;return;}
+  S.s3=dToS3(o.d,T0);
+  if(o.p!=null)S.s2={pred:String(o.p),locked:true};
+  if(o.w)S.s7={why:o.w.why||'',from:o.w.from||'',to:o.w.to||''};
+  if(S.max<2)S.max=2;save();view3();
 }
 function check3(){
   const s=S.s3;let bad=0;
@@ -1481,7 +1509,9 @@ function teamCode2(){
   const s=S.s6,G=groupD(),f=pFast(G);
   return teamEnc(teamSet(team(),'t',{t0:T0,t:+s.t,rep:s.rep,base:repValue(f,s.rep),mg:+s.mg,why:s.why.trim(),re:s.re,d:G},teamToday()));
 }
-function ansOk(){const s=S.s6,f=pFast(groupD());return s.rep!=='mean'||(pNum(s.ans)!==null&&+s.ans===hitsAt(f,f.mean));}
+// 평균·중앙값을 고르면 그 값으로 정했을 때 몇 번 부딪히는지 스스로 세게 한다
+function asksHits(f,rep){return (rep==='mean'||rep==='med')&&repValue(f,rep)!=null;}
+function ansOk(){const s=S.s6,f=pFast(groupD());return !asksHits(f,s.rep)||(pNum(s.ans)!==null&&+s.ans===hitsAt(f,repValue(f,s.rep)));}
 function ok6(){const s=S.s6,c=checkT(pFast(groupD()),s.rep,s.mg,s.t);return !!S.s3.ok&&teamOk()&&c.ok&&ansOk()&&s.why.trim().length>=5&&!!s.re;}
 function view6(){
   const s=S.s6,f=pFast(groupD()),t=team(),i=S.info;
@@ -1491,9 +1521,10 @@ function view6(){
   $('#view').innerHTML=`
   <div class="vh"><h2>T 정하기</h2></div>
   <div class="box"><h3>우리 모둠 빠름 단계</h3>
-    <p style="margin:0 0 12px">${f.n}번 · 평균 <b>${f.mean??'-'}</b>cm · 최댓값 <b>${f.max??'-'}</b>cm${f.hits?` · 충돌 <b>${f.hits}</b>번`:''}</p>
+    <p style="margin:0 0 4px">${f.n}번${f.hits?` · 충돌 <b>${f.hits}</b>번`:''}</p>
+    <table class="dt" style="margin:0 0 12px;width:auto"><tr><th>평균</th><td><b>${f.mean??'-'}</b>cm</td><td class="hint">${f.hits?`충돌 ${f.hits}번은 계산에 넣지 못함`:''}</td></tr><tr><th>중앙값</th><td><b>${f.med??'충돌'}</b>${f.med!=null?'cm':''}</td><td class="hint">${f.hits?'충돌은 가장 긴 값으로 놓고 가운데를 찾음':''}</td></tr><tr><th>최댓값</th><td><b>${f.max??'-'}</b>cm</td><td></td></tr></table>
     <div class="row">
-      <label>대표값 ${sel('rep',[['mean','평균'],['max','최댓값']],s.rep)}</label>
+      <label>대표값 ${sel('rep',[['mean','평균'],['med','중앙값'],['max','최댓값']],s.rep)}</label>
       <label>여유 <input type="number" id="mg" min="0" max="20" step="1" style="width:80px" value="${esc(s.mg)}"> cm</label>
       <label>새 T ${sel('tt',T_OPTIONS.map(v=>[v,v+'cm']),s.t)}</label>
     </div>
@@ -1513,9 +1544,10 @@ function view6(){
 }
 function upd6(){
   const s=S.s6,f=pFast(groupD()),a=$('#ask6');
-  if(s.rep==='mean'){
-    a.innerHTML=`<div class="ask" style="margin:12px 0 0">평균(${f.mean??'-'}cm)으로 정하면, 우리 모둠 빠름 단계 ${f.n}번 가운데 몇 번 부딪힐까요? <input type="number" id="ans" min="0" max="${f.n}" style="width:70px" value="${esc(s.ans)}"> 번</div><div id="ansm"></div>`;
-    const show=()=>{$('#ansm').innerHTML=s.ans===''?'':ansOk()?`<div class="msg ok">맞아요. ${f.n}번 가운데 ${hitsAt(f,f.mean)}번 부딪혀요.</div>`:'<div class="msg bad">그래프에서 평균보다 높은 점과 ✕를 세어 보세요.</div>';};
+  if(asksHits(f,s.rep)){
+    const nm=REP_NAME[s.rep],bv=repValue(f,s.rep);
+    a.innerHTML=`<div class="ask" style="margin:12px 0 0">${nm}(${bv}cm)으로 정하면, 우리 모둠 빠름 단계 ${f.n}번 가운데 몇 번 부딪힐까요? <input type="number" id="ans" min="0" max="${f.n}" style="width:70px" value="${esc(s.ans)}"> 번</div><div id="ansm"></div>`;
+    const show=()=>{$('#ansm').innerHTML=s.ans===''?'':ansOk()?`<div class="msg ok">맞아요. ${f.n}번 가운데 ${hitsAt(f,bv)}번 부딪혀요.</div>`:`<div class="msg bad">그래프에서 ${nm}보다 높은 점과 ✕를 세어 보세요.</div>`;};
     $('#ans').oninput=e=>{s.ans=e.target.value;save();show();gate6();};
     show();
   } else a.innerHTML='';
@@ -1647,7 +1679,7 @@ function teacher(){
    <table><tr><th>1단계</th><td>모둠 코드가 없음 → 같은 모둠원의 AI 교수·학습 플랫폼 글에서 복사. 모둠 번호가 다르면 막힘(의도)</td></tr>
    <tr><th>3단계</th><td>제동거리 칸이 틀림 → T − g를 직접 계산하는 것이 목적(의도). g가 T보다 큼 → 초음파가 잘못 읽어 일찍 멈춤, 다시 재기</td></tr>
    <tr><th>4단계</th><td>축을 바꿔 고름 → 의도된 막힘. "속도가 빠를수록"을 말할 수 있는 축은?</td></tr>
-   <tr><th>6단계</th><td>평균을 고름 → 몇 번 부딪힐지 세게 함. 최댓값 + 여유로 가는 것이 목표</td></tr></table>`;
+   <tr><th>6단계</th><td>평균·중앙값·최댓값 비교. 평균이나 중앙값을 고르면 몇 번 부딪힐지 세게 함. 최댓값 + 여유로 가는 것이 목표</td></tr></table>`;
   el.hidden=false;
   $('#tclose').onclick=()=>{el.hidden=true;};
   $('#tun').onchange=e=>{S.unlock=e.target.checked;save();rail();};
