@@ -1341,6 +1341,20 @@ function scatterSVG(pts,x,y,w,h){
   return s+'</svg>';
 }
 
+/* T 그림(3단계 위): T는 반응을 시작하는 거리, 그 뒤 더 간 거리 = 제동거리, 남은 거리 g = T − 제동거리 */
+function tFigSVG(){
+  const wx=500,tx=300,sx=440;
+  const bot=(fx,o)=>`<g opacity="${o}"><rect x="${fx-56}" y="56" width="56" height="26" rx="4" fill="#353a3f"/><circle cx="${fx-44}" cy="85" r="6" fill="#24282c"/><circle cx="${fx-12}" cy="85" r="6" fill="#24282c"/></g>`;
+  return `<svg viewBox="0 0 520 132" width="100%" style="max-width:640px;display:block;margin:4px 0 10px" role="img" aria-label="T에서 반응, 제동거리만큼 더 가서 멈춤, 벽까지 남은 거리 g">
+  <line x1="10" y1="92" x2="${wx}" y2="92" stroke="#8d949a" stroke-width="2"/><rect x="${wx}" y="30" width="12" height="62" fill="#353a3f"/>
+  ${bot(tx,.35)}${bot(sx,1)}
+  <line x1="${tx}" y1="22" x2="${tx}" y2="92" stroke="#e0a800" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <path d="M${tx} 22H${wx}" stroke="#b8860b" stroke-width="2.5"/><text x="${(tx+wx)/2}" y="16" text-anchor="middle" font-size="16" font-weight="700" fill="#7a5900">T = ${T0}cm (여기서 반응)</text>
+  <path d="M${tx} 108H${sx-4}" stroke="#cf3027" stroke-width="3"/><path d="M${sx-10} 102L${sx} 108L${sx-10} 114z" fill="#cf3027"/><text x="${(tx+sx)/2}" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#9b211a">제동거리</text>
+  <path d="M${sx} 100V108H${wx}V100" fill="none" stroke="#24282c" stroke-width="2"/><text x="${(sx+wx)/2}" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#24282c">g</text>
+  <text x="10" y="40" font-size="15" fill="#24282c">출발 →</text></svg>`;
+}
+
 /* ===== 1. 준비 ===== */
 function view1(){
   const i=S.info;
@@ -1409,7 +1423,7 @@ function view3(){
   $('#view').innerHTML=`
   <div class="vh"><h2>측정</h2></div>
   ${s.ok?'':`<details class="box"><summary>다른 컴퓨터에서 측정했어요</summary><textarea id="rp3" rows="2" placeholder="SPARK-P:…" style="margin-top:10px"></textarea><div class="row" style="margin-top:8px"><button class="btn ghost" id="rpg3">내 측정 불러오기</button></div><div id="rpm3"></div></details>`}
-  <div class="box"><p style="margin:0 0 12px">T = <b>${T0}cm</b> · 벽 앞 1m에서 출발 · 부딪히면 충돌</p>
+  <div class="box"><p style="margin:0 0 4px">T = <b>${T0}cm</b> · 벽 앞 1m에서 출발 · 부딪히면 충돌</p>${tFigSVG()}
     <div class="tw" style="max-height:none"><table class="dt meas"><thead><tr><th class="nosort">속도</th><th class="nosort">회</th><th class="nosort">남은 거리 g (cm)</th><th class="nosort"></th><th class="nosort">제동거리 T − g (cm)</th><th class="nosort"></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="row" style="margin-top:12px"><button class="btn" id="ck3">확인</button></div><div id="m3"></div>
   </div>
