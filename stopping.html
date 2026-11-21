@@ -1070,7 +1070,8 @@ function teamViewHTML(team){
     const cnt=n?' · '+TEAM_KIND.map(([k,l])=>`${l} ${e(n[k])}`).join(' · ')+` · 신호등 없는 횡단보도 ${e(n.ns)}`:'';
     const crit=TEAM_CRIT.filter((c,i)=>s.c&&s.c[i]).join(' · ');
     h.push(`<section><h3>★ ${e(s.p)}</h3><div id="tvmap" class="tv-map"></div><p class="hint">둘레 ${e(s.r)}m${cnt}</p>${crit?`<p>${e(crit)}</p>`:''}</section>`);}
-  if(team.t)h.push(`<section><h3>멈춤 기준 T = ${e(team.t.t)}cm</h3><p>${e(team.t.why)}</p></section>`);
+  if(team.t&&team.t.t!=null)h.push(`<section><h3>멈춤 기준 T = ${e(team.t.t)}cm</h3><p>${e(team.t.why)}</p></section>`);
+  else if(team.t&&team.t.g0!=null)h.push(`<section><h3>처음 생각한 T = ${e(team.t.g0)}cm</h3><p>${e(team.t.gw)}</p></section>`);
   if(team.o)h.push(`<section><h3>우리가 풀 문제</h3><p>${e(team.o.q)}</p></section>`);
   return h.join('');
 }
@@ -1295,7 +1296,7 @@ function fresh(){return{step:0,max:0,unlock:false,info:{ban:'',mo:'',no:''},team
   s2:{pred:'',locked:false},
   s3:{g:blank3(''),bd:blank3(''),hit:blank3(false),ok:false},
   s4:{x:'',y:'',line:''},
-  s5:{mem:{}},
+  s5:{mem:{},g0:'',gw:''},
   s6:{rep:'',mg:'',t:'',why:'',re:'',ans:''},
   s7:{why:'',from:'',to:''},
 };}
@@ -1306,7 +1307,13 @@ function team(){try{return S.teamRaw.trim()?teamDec(S.teamRaw):null;}catch(e){re
 function teamOk(){const t=team(),i=S.info;return !!t&&!!(i.ban&&i.mo&&i.no)&&!teamCheck(t,i.ban,i.mo)&&!teamNeed(t,'s');}
 function myD(){return runsToD(S.s3,T0);}
 // 모둠원 먼저, 내 측정은 마지막(번호가 겹쳐도 내 측정이 남는다)
-function groupD(){const G={};for(const [n,o] of Object.entries(S.s5.mem))G[n]=o.d;G[S.info.no]=myD();return G;}
+// 모둠 코드에 담긴 측정값(5단계에서 저장, 다른 PC에서 이어 쓰기) → 모둠원 코드 → 내 측정(마지막, 번호가 겹쳐도 내 것이 남는다)
+function teamD(){const t=team();return t&&t.t&&t.t.d?t.t.d:null;}
+function groupD(){const G=Object.assign({},teamD()||{});for(const [n,o] of Object.entries(S.s5.mem))G[n]=o.d;if(S.s3.ok)G[S.info.no]=myD();return G;}
+function firstT(){const t=team(),tt=t&&t.t;return{g0:S.s5.g0||(tt&&tt.g0!=null?String(tt.g0):''),gw:S.s5.gw||(tt&&tt.gw)||''};}
+function ok5(){const f=firstT();return !!S.s3.ok&&teamOk()&&!!f.g0&&f.gw.trim().length>=2;}
+// 5단계 모둠 코드: 첫 T와 모둠 측정값(새 T는 6단계에서 더한다)
+function teamCode1(){const f=firstT();return teamEnc(teamSet(team(),'t',{t0:T0,g0:+f.g0,gw:f.gw.trim(),d:groupD()},teamToday()));}
 function myIdx(){return Object.keys(groupD()).indexOf(String(S.info.no));}
 function baseText(rep,base){return base==null?'빠름 단계 모두 충돌':`${REP_NAME[rep]||'평균'} ${base}cm`;}
 const NEED3='<div class="msg bad">3단계 측정을 다시 확인해 주세요.</div>';
@@ -1443,6 +1450,7 @@ function view3(){
       <td class="fb3"></td></tr>`;}
   $('#view').innerHTML=`
   <div class="vh"><h2>측정</h2></div>
+  ${!s.ok&&teamD()&&teamD()[String(S.info.no)]?`<div class="box"><div class="row"><span>모둠 코드에 내 측정(${esc(S.info.no)}번)이 있어요.</span><button class="btn ghost" id="rpt3">모둠 코드에서 내 측정 불러오기</button></div></div>`:''}
   ${s.ok?'':`<details class="box"><summary>다른 컴퓨터에서 측정했어요</summary><textarea id="rp3" rows="2" placeholder="SPARK-P:…" style="margin-top:10px"></textarea><div class="row" style="margin-top:8px"><button class="btn ghost" id="rpg3">내 측정 불러오기</button></div><div id="rpm3"></div></details>`}
   <div class="box"><p style="margin:0 0 4px">T = <b>${T0}cm</b> · 벽 앞 1m에서 출발 · 부딪히면 충돌</p>${tFigSVG()}
     <div class="tw" style="max-height:none"><table class="dt meas"><thead><tr><th class="nosort">속도</th><th class="nosort">회</th><th class="nosort">남은 거리 g (cm)</th><th class="nosort"></th><th class="nosort">제동거리 T − g (cm)</th><th class="nosort"></th></tr></thead><tbody>${rows}</tbody></table></div>
@@ -1455,6 +1463,7 @@ function view3(){
     $('.hit',tr).onchange=e=>{s.hit[a][r]=e.target.checked;if(e.target.checked){s.g[a][r]='';s.bd[a][r]='';}s.ok=false;save();view3();};});
   $('#ck3').onclick=check3;
   const rb=$('#rpg3');if(rb)rb.onclick=restore3;
+  const rt=$('#rpt3');if(rt)rt.onclick=()=>{S.s3=dToS3(teamD()[String(S.info.no)],T0);if(S.max<2)S.max=2;save();view3();};
   if(s.ok)check3();else gate3();
 }
 // 다른 컴퓨터에서 이어 하기: 내 측정 코드(반·모둠·번호가 같아야 함)로 측정표와 예측을 되살린다
@@ -1526,7 +1535,13 @@ function view5(){
     <div class="key">${Object.keys(G).map((n,k)=>`<span><i style="background:${colorOf(k)}"></i>${esc(n)}번</span>`).join('')}<span style="color:#cf3027">✕ 충돌</span></div>
     <div class="ask" style="margin:12px 0 0">같은 속도인데 마퀸마다 멈추는 거리가 달라요. 어느 로봇을 기준으로 T를 정해야 할까요?</div>
   </div>
-  ${nextBtn(4,true)}`;
+  <div class="box"><h3>우리 모둠의 첫 T</h3>
+    <div class="ask" style="margin:0 0 10px">지금 T를 정한다면 몇 cm로 할까요?</div>
+    <div class="row"><label>첫 T <select id="g0"><option value="">고르기</option>${T_OPTIONS.map(v=>`<option value="${v}" ${String(s.g0)===String(v)?'selected':''}>${v}cm</option>`).join('')}</select></label>
+    <label style="flex:1">까닭 <input type="text" id="gw" style="width:100%" value="${esc(s.gw)}" placeholder="빠름에서 ___cm까지 갔으니까"></label></div>
+  </div>
+  <div id="o5"></div>
+  <div id="n5"></div>`;
   $('#padd').onclick=()=>{
     const m=$('#m5');let o;
     try{o=pCodeDec($('#pin').value);}catch(e){m.innerHTML=`<div class="msg bad">${esc(e.message)}</div>`;return;}
@@ -1536,25 +1551,44 @@ function view5(){
     s.mem[o.n]={d:o.d,p:o.p};save();view5();
   };
   $$('.rm').forEach(b=>b.onclick=()=>{delete s.mem[b.dataset.n];save();view5();});
-  bindNext(4);
+  $('#g0').onchange=e=>{s.g0=e.target.value;save();gate5();};
+  $('#gw').oninput=e=>{s.gw=e.target.value;save();gate5();};
+  gate5();
+}
+// 첫 T를 적으면 측정 카드와 모둠 코드가 나온다(이 시간의 결과물, 다음 시간 이어 쓰기)
+function gate5(){
+  const ok=ok5();
+  $('#o5').innerHTML=ok?`<div class="box"><h3>측정 카드</h3><div id="c5"></div></div>
+   <div class="box"><h3>모둠 코드 <span class="hint">다음 시간에 이 코드로 이어서 해요</span></h3><div class="code" id="tc5">${esc(teamCode1())}</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="tcc5">코드 복사</button><span class="hint" id="tcm5"></span></div></div>`:'';
+  $('#n5').innerHTML=nextBtn(4,ok);bindNext(4);
+  if(!ok)return;
+  $('#tcc5').onclick=()=>copyText(teamCode1(),$('#tcm5'),$('#tc5'));
+  clearTimeout(gate5.t);gate5.t=setTimeout(async()=>{const c=$('#c5');if(c)showCard('#c5',await cardP(),'측정 카드',stuId(S.info.ban,S.info.no));},300);
 }
 
 /* ===== 6. T 정하기 ===== */
 function teamCode2(){
   const s=S.s6,G=groupD(),f=pFast(G);
-  return teamEnc(teamSet(team(),'t',{t0:T0,t:+s.t,rep:s.rep,base:repValue(f,s.rep),mg:+s.mg,why:s.why.trim(),re:s.re,d:G},teamToday()));
+  const ft=firstT();
+  return teamEnc(teamSet(team(),'t',{t0:T0,t:+s.t,rep:s.rep,base:repValue(f,s.rep),mg:+s.mg,why:s.why.trim(),re:s.re,...(ft.g0?{g0:+ft.g0,gw:ft.gw.trim()}:{}),d:G},teamToday()));
 }
 // 평균·중앙값을 고르면 그 값으로 정했을 때 몇 번 부딪히는지 스스로 세게 한다
 function asksHits(f,rep){return (rep==='mean'||rep==='med')&&repValue(f,rep)!=null;}
 function ansOk(){const s=S.s6,f=pFast(groupD());return !asksHits(f,s.rep)||(pNum(s.ans)!==null&&+s.ans===hitsAt(f,repValue(f,s.rep)));}
-function ok6(){const s=S.s6,c=checkT(pFast(groupD()),s.rep,s.mg,s.t);return !!S.s3.ok&&teamOk()&&c.ok&&ansOk()&&s.why.trim().length>=5&&!!s.re;}
+function ok6(){const s=S.s6,c=checkT(pFast(groupD()),s.rep,s.mg,s.t),ft=firstT();return (!!S.s3.ok||!!teamD())&&teamOk()&&!!ft.g0&&c.ok&&ansOk()&&s.why.trim().length>=5&&!!s.re;}
 function view6(){
   const s=S.s6,f=pFast(groupD()),t=team(),i=S.info;
-  if(!S.s3.ok){$('#view').innerHTML=`<div class="vh"><h2>T 정하기</h2></div><div class="box">${NEED3}</div>`;return;}
+  if(!S.s3.ok&&!teamD()){$('#view').innerHTML=`<div class="vh"><h2>T 정하기</h2></div><div class="box">${NEED3}</div>`;return;}
   if(!teamOk()){$('#view').innerHTML=`<div class="vh"><h2>T 정하기</h2></div><div class="box"><div class="msg bad">${esc(t?(teamCheck(t,i.ban,i.mo)||teamNeed(t,'s')):'1단계에서 모둠 코드를 넣어 주세요.')}</div></div>`;return;}
   const sel=(id,opts,v)=>`<select id="${id}"><option value="">고르기</option>${opts.map(([k,l])=>`<option value="${k}" ${String(v)===String(k)?'selected':''}>${l}</option>`).join('')}</select>`;
+  const ft=firstT();
+  const ftBox=S.s5.g0||(t&&t.t&&t.t.g0!=null)?`<div class="box"><div class="ask" style="margin:0">처음 생각한 T는 <b>${esc(ft.g0)}cm</b>였어요(${esc(ft.gw)}). 데이터로 정하면 몇 cm일까요?</div></div>`
+   :`<div class="box"><h3>우리 모둠의 첫 T</h3><div class="ask" style="margin:0 0 10px">데이터를 보기 전에, T를 정한다면 몇 cm로 할까요?</div>
+    <div class="row"><label>첫 T <select id="g0"><option value="">고르기</option>${T_OPTIONS.map(v=>`<option value="${v}" ${String(S.s5.g0)===String(v)?'selected':''}>${v}cm</option>`).join('')}</select></label>
+    <label style="flex:1">까닭 <input type="text" id="gw" style="width:100%" value="${esc(S.s5.gw)}"></label></div></div>`;
   $('#view').innerHTML=`
   <div class="vh"><h2>T 정하기</h2></div>
+  ${ftBox}
   <div class="box"><h3>우리 모둠 빠름 단계</h3>
     <p style="margin:0 0 4px">${f.n}번${f.hits?` · 충돌 <b>${f.hits}</b>번`:''}</p>
     <table class="dt" style="margin:0 0 12px;width:auto"><tr><th>평균</th><td><b>${f.mean??'-'}</b>cm</td><td class="hint">${f.hits?`충돌 ${f.hits}번은 계산에 넣지 못함`:''}</td></tr><tr><th>중앙값</th><td><b>${f.med??'충돌'}</b>${f.med!=null?'cm':''}</td><td class="hint">${f.hits?'충돌은 가장 긴 값으로 놓고 가운데를 찾음':''}</td></tr><tr><th>최댓값</th><td><b>${f.max??'-'}</b>cm</td><td></td></tr></table>
@@ -1575,6 +1609,7 @@ function view6(){
   $('#tt').onchange=e=>{s.t=e.target.value;save();upd6();};
   $('#why').oninput=e=>{s.why=e.target.value;save();gate6();};
   $$('input[name=re]').forEach(r=>r.onchange=()=>{s.re=r.value;save();gate6();});
+  const g0=$('#g0');if(g0){g0.onchange=e=>{S.s5.g0=e.target.value;save();gate6();};$('#gw').oninput=e=>{S.s5.gw=e.target.value;save();gate6();};}
   upd6();
 }
 function upd6(){
@@ -1632,19 +1667,31 @@ async function cardP(){
   const gy=sec(g,560,156,1000,424,'내 그래프');
   scatterCanvas(g,pPoints(d,myIdx()),S.s4.x||'속도 단계',S.s4.y||'제동거리',580,gy-24,960,312);
   if(S.s4.line){g.fillStyle=K.ink;g.font=`21px ${FONT}`;wrap(g,`속도가 빠를수록 ${S.s4.line}`,580,566,960,28,1);}
-  // 오른쪽 가운데: 모둠의 새 T
-  y=sec(g,560,596,1000,224,'우리 모둠의 새 T');
-  g.fillStyle=K.ink;g.font=`bold 64px ${FONT}`;g.fillText(`T = ${s.t}cm`,580,y+46);
-  g.fillStyle=K.sub;g.font=`21px ${FONT}`;g.fillText(`${baseText(s.rep,repValue(f,s.rep))} + 여유 ${s.mg}cm · 다시 해 보니 ${s.re==='ok'?'멈췄다':'부딪혔다'}`,900,y);
-  g.fillStyle=K.ink;g.font=`22px ${FONT}`;wrap(g,s.why,900,y+40,640,30,3);
-  // 오른쪽 아래: 내 정리 문장
-  y=sec(g,560,836,1000,112,'내 정리');const w=S.s7;
-  g.fillStyle=K.ink;g.font=`22px ${FONT}`;wrap(g,`기준값은 ${w.why} 때문에 ${w.from}에서 ${w.to}로 바뀌었다.`,580,y-6,960,28,2);
+  const ft=firstT(),full=ok6();
+  if(full){
+    // 오른쪽 가운데: 모둠의 새 T (+ 처음 생각한 T)
+    y=sec(g,560,596,1000,224,'우리 모둠의 새 T');
+    g.fillStyle=K.ink;g.font=`bold 64px ${FONT}`;g.fillText(`T = ${s.t}cm`,580,y+46);
+    if(ft.g0){g.fillStyle=K.sub;g.font=`20px ${FONT}`;g.fillText(`처음 생각한 T ${ft.g0}cm`,580,y+92);}
+    g.fillStyle=K.sub;g.font=`21px ${FONT}`;g.fillText(`${baseText(s.rep,repValue(f,s.rep))} + 여유 ${s.mg}cm · 다시 해 보니 ${s.re==='ok'?'멈췄다':'부딪혔다'}`,900,y);
+    g.fillStyle=K.ink;g.font=`22px ${FONT}`;wrap(g,s.why,900,y+40,640,30,3);
+    // 오른쪽 아래: 내 정리 문장
+    y=sec(g,560,836,1000,112,'내 정리');const w=S.s7;
+    g.fillStyle=K.ink;g.font=`22px ${FONT}`;wrap(g,`기준값은 ${w.why} 때문에 ${w.from}에서 ${w.to}로 바뀌었다.`,580,y-6,960,28,2);
+  }else{
+    // 측정 시간(5단계): 우리 모둠의 첫 T와 다음 시간 예고
+    y=sec(g,560,596,1000,224,'우리 모둠의 첫 T');
+    g.fillStyle=K.ink;g.font=`bold 64px ${FONT}`;g.fillText(`T = ${ft.g0}cm`,580,y+46);
+    g.fillStyle=K.sub;g.font=`21px ${FONT}`;g.fillText('까닭',900,y);
+    g.fillStyle=K.ink;g.font=`22px ${FONT}`;wrap(g,ft.gw,900,y+40,640,30,3);
+    y=sec(g,560,836,1000,112,'다음 시간');
+    g.fillStyle=K.ink;g.font=`22px ${FONT}`;wrap(g,'모둠 측정값의 평균·중앙값·최댓값을 비교해 T를 다시 정한다.',580,y-6,960,28,2);
+  }
   return cv;
 }
 const ok7=()=>['why','from','to'].every(k=>S.s7[k].trim().length>0);
 async function view7(){
-  const ok=S.s3.ok&&ok6(),w=S.s7;
+  const ok=ok6()&&S.s3.ok,okT=ok6(),w=S.s7;
   $('#view').innerHTML=`
   <div class="vh"><h2>결과 카드</h2></div>
   ${ok?`<div class="box">
@@ -1653,14 +1700,14 @@ async function view7(){
    <div class="row" style="margin-top:8px"><input type="text" id="w7f" style="width:120px" value="${esc(w.from)}"> 에서 <input type="text" id="w7t" style="width:120px" value="${esc(w.to)}"> 로 바뀌었다.</div>
    <div class="row" style="margin-top:12px"><button class="btn" id="mk7">카드 만들기</button><span class="hint" id="m7"></span></div>
   </div>`:''}
-  <div class="box"><h3>측정 카드</h3><div id="c1">${ok?'<div class="hint">위 문장을 채우고 [카드 만들기]</div>':S.s3.ok?'<div class="hint">6단계를 마치면 만들어져요.</div>':NEED3}</div></div>
+  <div class="box"><h3>측정 카드</h3><div id="c1">${ok?'<div class="hint">위 문장을 채우고 [카드 만들기]</div>':!S.s3.ok?'<div class="msg bad">카드에는 내 측정이 필요해요. 3단계에서 내 측정 코드로 되살려 주세요.</div>':'<div class="hint">6단계를 마치면 만들어져요.</div>'}</div></div>
   <div class="grid2">
    <div class="box"><h3>내 측정 코드</h3>${S.s3.ok?`<div class="code" id="k1">${esc(myPCode())}</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="kc1">코드 복사</button><span class="hint" id="km1"></span></div>`:'<div class="hint">3단계를 마치면 생겨요.</div>'}</div>
-   <div class="box"><h3>모둠 코드 <span class="hint">다음 시간에 다시 써요</span></h3>${ok?`<div class="code" id="k2">${esc(teamCode2())}</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="kc2">코드 복사</button><span class="hint" id="km2"></span></div>`:'<div class="hint">6단계를 마치면 생겨요.</div>'}</div>
+   <div class="box"><h3>모둠 코드 <span class="hint">다음 시간에 다시 써요</span></h3>${okT?`<div class="code" id="k2">${esc(teamCode2())}</div><div class="row" style="margin-top:8px"><button class="btn ghost" id="kc2">코드 복사</button><span class="hint" id="km2"></span></div>`:'<div class="hint">6단계를 마치면 생겨요.</div>'}</div>
   </div>`;
   if(S.s3.ok)$('#kc1').onclick=()=>copyText(myPCode(),$('#km1'),$('#k1'));
+  if(okT)$('#kc2').onclick=()=>copyText(teamCode2(),$('#km2'),$('#k2'));
   if(!ok)return;
-  $('#kc2').onclick=()=>copyText(teamCode2(),$('#km2'),$('#k2'));
   [['#w7y','why'],['#w7f','from'],['#w7t','to']].forEach(([id,k])=>$(id).oninput=e=>{w[k]=e.target.value;save();$('#k1').textContent=myPCode();});
   const make=async()=>{if(!ok7()){$('#m7').textContent='빈칸을 채우면 카드가 만들어져요.';return;}$('#m7').textContent='';showCard('#c1',await cardP(),'측정 카드',stuId(S.info.ban,S.info.no));};
   $('#mk7').onclick=make;
@@ -1675,6 +1722,7 @@ const SAMPLE={info:{ban:'3',mo:'2',no:'14'},
   pred:'10',d:[[3.5,4,3],[8,9.5,8.5],[15,17.5,-1]],
   others:{'3':[[2.5,3,3.5],[7.5,8,8],[14,15.5,15]],'7':[[3,4.5,4],[9,8,10],[16.5,18,17]],'21':[[4,3.5,4],[10.5,9,9.5],[19,-1,18.5]]},
   s4:{x:'속도 단계',y:'제동거리',line:'제동거리가 길어진다'},
+  s5:{g0:'15',gw:'빠름에서 15cm쯤 더 갔으니까'},
   s6:{rep:'max',mg:'5',t:'25',why:'빠름 단계 최대 19cm에 여유 5cm, 충돌도 2번 있었다',re:'ok',ans:''}};
 function sampleState(){
   const st=fresh();st.info={...SAMPLE.info};
@@ -1682,7 +1730,7 @@ function sampleState(){
   st.s2={pred:SAMPLE.pred,locked:true};
   SAMPLE.d.forEach((row,a)=>row.forEach((v,r)=>{if(v<0)st.s3.hit[a][r]=true;else{st.s3.g[a][r]=String(+(T0-v).toFixed(1));st.s3.bd[a][r]=String(v);}}));
   st.s3.ok=true;st.s4={...SAMPLE.s4};
-  Object.entries(SAMPLE.others).forEach(([n,d])=>{st.s5.mem[n]={d,p:null};});
+  Object.entries(SAMPLE.others).forEach(([n,d])=>{st.s5.mem[n]={d,p:null};});st.s5.g0=SAMPLE.s5.g0;st.s5.gw=SAMPLE.s5.gw;
   st.s6={...SAMPLE.s6};st.s7={why:'평균으로 정하면 빠름 단계에서 부딪히기',from:'20cm',to:'25cm'};st.step=5;st.max=6;return st;
 }
 function tLoad(){try{const t=JSON.parse(localStorage.getItem(TKEY)||'null');if(t&&Array.isArray(t.teams)&&Array.isArray(t.pre))return t;}catch(e){}return{teams:[],pre:blank3('')};}
@@ -1692,7 +1740,7 @@ function tDraw(){
   const pts=T.teams.flatMap((t,ti)=>Object.values(t.t.d).flatMap(d=>pPoints(d,ti+1)));
   T.pre.forEach((row,a)=>row.forEach((v,r)=>{const n=pNum(v);if(n!==null)pts.push({a:a+1,r:r+1,g:n<0?0:+(T0-n).toFixed(1),bd:n<0?null:n,hit:n<0,c:-1});}));
   $('#tplot').innerHTML=pts.length?`${scatterSVG(pts,'속도 단계','제동거리',900,380)}<div class="key">${T.teams.map((t,ti)=>`<span><i style="background:${colorOf(ti+1)}"></i>${esc(t.b)}반 ${esc(t.m)}모둠</span>`).join('')}${T.pre.flat().some(v=>pNum(v)!==null)?'<span><i style="background:#24282c"></i>교사 사전 실측</span>':''}</div>`:'<div class="hint">아직 넣은 모둠 코드가 없어요.</div>';
-  $('#ttab').innerHTML=T.teams.length?`<table><tr><th>모둠</th><th>새 T</th><th>대표값</th><th>여유</th><th>근거</th><th>다시 해 보니</th></tr>${T.teams.map((t,ti)=>`<tr><td><span style="color:${colorOf(ti+1)}">●</span> ${esc(t.b)}반 ${esc(t.m)}모둠</td><td><b>${esc(t.t.t)}cm</b></td><td>${esc(baseText(t.t.rep,t.t.base))}</td><td>${esc(t.t.mg)}cm</td><td>${esc(t.t.why)}</td><td>${t.t.re==='ok'?'멈췄다':'부딪혔다'}</td></tr>`).join('')}</table>`:'';
+  $('#ttab').innerHTML=T.teams.length?`<table><tr><th>모둠</th><th>첫 T</th><th>새 T</th><th>대표값</th><th>여유</th><th>근거</th><th>다시 해 보니</th></tr>${T.teams.map((t,ti)=>{const x=t.t,has=x.t!=null;return `<tr><td><span style="color:${colorOf(ti+1)}">●</span> ${esc(t.b)}반 ${esc(t.m)}모둠</td><td>${x.g0!=null?esc(x.g0)+'cm':'-'}</td><td><b>${has?esc(x.t)+'cm':'-'}</b></td><td>${has?esc(baseText(x.rep,x.base)):'-'}</td><td>${has?esc(x.mg)+'cm':'-'}</td><td>${has?esc(x.why):esc(x.gw||'')}</td><td>${has?(x.re==='ok'?'멈췄다':'부딪혔다'):'-'}</td></tr>`;}).join('')}</table>`:'';
 }
 function teacher(){
   const el=$('#teacher');if(!el.hidden){el.hidden=true;return;}
@@ -1709,7 +1757,7 @@ function teacher(){
    <div class="row"><button class="btn sign" id="tsample">샘플로 채우기 (3반 2모둠 14번 · 6단계까지)</button><span class="hint">지금 이 PC의 작업은 지워져요.</span></div>
    <div class="row" style="margin-top:8px">${Object.keys(SAMPLE.others).map(n=>`<button class="btn ghost tsp" data-n="${n}">샘플 ${n}번 측정 코드 복사</button>`).join('')}<span class="hint" id="tspm"></span></div>
    <h3>마퀸 버튼</h3>
-   <table><tr><th>A</th><td>속도 단계 1 느림 → 2 보통 → 3 빠름 (속도 값 60·120·200)</td></tr><tr><th>A+B</th><td>멈춤 기준 T 10 → 15 → … → 40cm</td></tr><tr><th>B</th><td>출발 → 멈추면 ✕</td></tr></table>
+   <table><tr><th>A</th><td>속도 단계 1 느림 → 2 보통 → 3 빠름 (속도 값 60·120·200)</td></tr><tr><th>A+B</th><td>멈춤 기준 T 10 → 15 → … → 40cm</td></tr><tr><th>B</th><td>출발 → 멈추면 남은 거리 g(cm)를 화면에 세 번</td></tr></table>
    <h3>자주 막히는 곳</h3>
    <table><tr><th>1단계</th><td>모둠 코드가 없음 → 같은 모둠원의 AI 교수·학습 플랫폼 글에서 복사. 모둠 번호가 다르면 막힘(의도)</td></tr>
    <tr><th>3단계</th><td>제동거리 칸이 틀림 → T − g를 직접 계산하는 것이 목적(의도). g가 T보다 큼 → 초음파가 잘못 읽어 일찍 멈춤, 다시 재기</td></tr>

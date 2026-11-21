@@ -1092,7 +1092,8 @@ function teamViewHTML(team){
     const cnt=n?' · '+TEAM_KIND.map(([k,l])=>`${l} ${e(n[k])}`).join(' · ')+` · 신호등 없는 횡단보도 ${e(n.ns)}`:'';
     const crit=TEAM_CRIT.filter((c,i)=>s.c&&s.c[i]).join(' · ');
     h.push(`<section><h3>★ ${e(s.p)}</h3><div id="tvmap" class="tv-map"></div><p class="hint">둘레 ${e(s.r)}m${cnt}</p>${crit?`<p>${e(crit)}</p>`:''}</section>`);}
-  if(team.t)h.push(`<section><h3>멈춤 기준 T = ${e(team.t.t)}cm</h3><p>${e(team.t.why)}</p></section>`);
+  if(team.t&&team.t.t!=null)h.push(`<section><h3>멈춤 기준 T = ${e(team.t.t)}cm</h3><p>${e(team.t.why)}</p></section>`);
+  else if(team.t&&team.t.g0!=null)h.push(`<section><h3>처음 생각한 T = ${e(team.t.g0)}cm</h3><p>${e(team.t.gw)}</p></section>`);
   if(team.o)h.push(`<section><h3>우리가 풀 문제</h3><p>${e(team.o.q)}</p></section>`);
   return h.join('');
 }
@@ -1930,7 +1931,7 @@ function v13b(){
   <div class="split"><div><div id="map13b" class="map" style="height:62vh"></div><div class="row" style="margin-top:8px">${baseBtns('map13b')}</div></div>
    <div><div class="box"><h3>★ ${esc(s.p)}</h3>
      ${n?`<div class="hint" style="margin-bottom:4px">${esc(s.r)}m 안</div><div class="cnt">${ORDER.map(k=>`<span><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${META[k].color};margin-right:6px"></span>${META[k].label}</span><b>${esc(n[k])}</b>`).join('')}<span style="color:#cf3027">└ 신호등 없음</span><b style="color:#cf3027">${esc(n.ns)}</b></div>`:''}
-     ${t.t?`<p style="margin:12px 0 0">멈춤 기준 T = <b>${esc(t.t.t)}cm</b></p>`:''}</div>
+     ${t.t&&t.t.t!=null?`<p style="margin:12px 0 0">멈춤 기준 T = <b>${esc(t.t.t)}cm</b></p>`:''}</div>
     <div class="ask">등굣길에서 본 ★ 둘레와 이 지도가 같았나요?</div></div></div>
   ${next13(1,true)}`;
   const m=maps.b=makeMap('map13b',[s.y,s.x],17);bindBases('map13b',m);pointsLayer(m);starLayer(m,s);
@@ -1992,7 +1993,7 @@ function v13d(){
   <div class="grid2">
    <div class="box"><h3>데이터 근거 <span class="hint">★ 둘레 ${esc(t.s.r)}m</span></h3>
      ${n?`<div class="cnt">${ORDER.map(k=>`<span>${META[k].label}</span><b>${esc(n[k])}</b>`).join('')}<span style="color:#cf3027">신호등 없는 횡단보도</span><b style="color:#cf3027">${esc(n.ns)}</b></div>`:''}
-     ${t.t?`<p style="margin:10px 0 0">멈춤 기준 T = <b>${esc(t.t.t)}cm</b></p>`:''}</div>
+     ${t.t&&t.t.t!=null?`<p style="margin:10px 0 0">멈춤 기준 T = <b>${esc(t.t.t)}cm</b></p>`:''}</div>
    <div class="box"><h3>경험 근거 <span class="hint">관찰 카드</span></h3>
      <div class="cnt"><span>관찰</span><b>${sum.n}번</b><span>1분 동안 지나간 차(평균)</span><b>${sum.cars??'-'}대</b><span>사람이 건널 때 멈춘 차</span><b>${sum.stop}대</b><span>안 멈춘 차</span><b>${sum.go}대</b><span>지도와 다른 것</span><b>${S13.diff.length}곳</b></div></div>
   </div>
@@ -2042,7 +2043,7 @@ async function card13(){
   y=sec(g,960,322,600,250,`데이터 근거 · ★ 둘레 ${s.r}m`);
   if(n){g.font=`22px ${FONT}`;ORDER.forEach((k,i)=>{const x=980+(i%2)*280,yy=y+Math.floor(i/2)*36;g.fillStyle=META[k].color;g.beginPath();g.arc(x+8,yy-7,8,0,7);g.fill();g.fillStyle=K.ink;g.fillText(`${META[k].label} ${n[k]}`,x+24,yy);});
     g.fillStyle=K.red;g.font=`bold 22px ${FONT}`;g.fillText(`신호등 없는 횡단보도 ${n.ns}`,980,y+80);}
-  if(t.t){g.fillStyle=K.ink;g.font=`22px ${FONT}`;g.fillText(`멈춤 기준 T = ${t.t.t}cm`,980,y+122);}
+  if(t.t&&t.t.t!=null){g.fillStyle=K.ink;g.font=`22px ${FONT}`;g.fillText(`멈춤 기준 T = ${t.t.t}cm`,980,y+122);}
   y=sec(g,960,588,600,200,'경험 근거 · 관찰 카드');
   g.fillStyle=K.ink;g.font=`22px ${FONT}`;g.fillText(`관찰 ${sum.n}번 · 1분 평균 ${sum.cars??'-'}대`,980,y);
   g.fillText(`건널 때 멈춘 차 ${sum.stop}대 / 안 멈춘 차 ${sum.go}대`,980,y+38);
@@ -3204,7 +3205,7 @@ function tsDraw(){
     L.circle([s.y,s.x],{radius:s.r||100,color:'#a77b00',weight:1.5,fillColor:'#ffc20e',fillOpacity:.12,interactive:false}).addTo(tsMap);
     L.marker([s.y,s.x],{zIndexOffset:2000,icon:L.divIcon({className:'',html:`<div class="tstar">★<span>${esc(t.b)}-${esc(t.m)}</span></div>`,iconSize:null,iconAnchor:[13,13]})}).bindTooltip(esc(`${t.b}반 ${t.m}모둠 · ${s.p}`)).addTo(tsMap);});
   if(list.length)tsMap.fitBounds(list.map(t=>[t.s.y,t.s.x]),{padding:[50,50],maxZoom:17});
-  $('#tslist').innerHTML=list.length?`<table><tr><th>모둠</th><th>★ 위치</th><th>우리 모둠이 풀 문제</th><th>T</th></tr>${list.map(t=>`<tr><td>${esc(t.b)}반 ${esc(t.m)}모둠</td><td>${esc(t.s.p)}</td><td>${t.o?esc(t.o.q):''}</td><td>${t.t?esc(t.t.t)+'cm':''}</td></tr>`).join('')}</table>`:'<div class="hint">아직 넣은 모둠 코드가 없어요.</div>';
+  $('#tslist').innerHTML=list.length?`<table><tr><th>모둠</th><th>★ 위치</th><th>우리 모둠이 풀 문제</th><th>T</th></tr>${list.map(t=>`<tr><td>${esc(t.b)}반 ${esc(t.m)}모둠</td><td>${esc(t.s.p)}</td><td>${t.o?esc(t.o.q):''}</td><td>${t.t&&t.t.t!=null?esc(t.t.t)+'cm':''}</td></tr>`).join('')}</table>`:'<div class="hint">아직 넣은 모둠 코드가 없어요.</div>';
 }
 function teacher(){
   const el=$('#teacher');if(!el.hidden){el.hidden=true;return;}
