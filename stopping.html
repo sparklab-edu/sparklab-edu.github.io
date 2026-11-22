@@ -1416,9 +1416,24 @@ function show1(loud){
   if(!(i.ban&&i.mo&&i.no)){m.innerHTML='<div class="msg bad">반·모둠·번호를 먼저 적어 주세요.</div>';return gate();}
   const bad=teamCheck(t,i.ban,i.mo)||teamNeed(t,'s');
   if(bad){m.innerHTML=`<div class="msg bad">${esc(bad)}</div>`;return gate();}
-  v.innerHTML=`<div class="box">${teamViewHTML(t)}<div class="ask">★에 작은 순찰 로봇을 둔다면, 로봇은 사람 몇 cm 앞에서 멈춰야 할까요?</div></div>`;
+  const x=t.t,rs=x&&x.d?(x.t!=null?{msg:`지난 시간에 정한 새 T(${esc(x.t)}cm)가 모둠 코드에 있어요.`,btn:'결과 카드로 가기'}:{msg:'지난 시간 모둠 측정값과 첫 T가 모둠 코드에 있어요.',btn:'T 정하기로 가기'}):null;
+  v.innerHTML=`${rs?`<div class="box"><div class="row"><span>${rs.msg}</span><button class="btn sign" id="rs1">${rs.btn}</button></div></div>`:''}<div class="box">${teamViewHTML(t)}<div class="ask">★에 작은 순찰 로봇을 둔다면, 로봇은 사람 몇 cm 앞에서 멈춰야 할까요?</div></div>`;
   maps.m1=teamViewMap('tvmap',t);
+  if(rs)$('#rs1').onclick=resumeTeam;
   gate();
+}
+// 다른 PC에서 이어 하기: 5단계 모둠 코드 → 6단계, 6단계 모둠 코드 → 7단계.
+// 내 측정과 모둠의 6단계 결과를 코드에서 채운다(예측은 코드에 없어 비워 둔다. 내 측정 코드를 3단계에 넣으면 되살아난다)
+function resumeTeam(){
+  const x=team().t,me=String(S.info.no),full=x.t!=null;
+  if(!S.s3.ok&&x.d[me])S.s3=dToS3(x.d[me],T0);
+  if(full&&!S.s6.t)S.s6=s6FromTeam(x);
+  S.max=Math.max(S.max,full?7:6);go(full?6:5);
+}
+function s6FromTeam(x){
+  const s={rep:x.rep||'',mg:x.mg!=null?String(x.mg):'',t:String(x.t),why:x.why||'',re:x.re||'',ans:''},f=pFast(groupD());
+  if(asksHits(f,s.rep))s.ans=String(hitsAt(f,repValue(f,s.rep)));
+  return s;
 }
 
 /* ===== 2. 예측 ===== */
@@ -1653,7 +1668,7 @@ async function cardP(){
   // 왼쪽 위: 예측과 실측
   let y=sec(g,40,156,500,300,`빠름 단계 · T = ${T0}cm`);
   g.fillStyle=K.sub;g.font=`20px ${FONT}`;g.fillText('예측: 벽까지',60,y);
-  g.fillStyle=K.ink;g.font=`bold 36px ${FONT}`;g.fillText(`${S.s2.pred}cm`,60,y+46);
+  g.fillStyle=K.ink;g.font=`bold 36px ${FONT}`;g.fillText(S.s2.pred?`${S.s2.pred}cm`:'-',60,y+46);
   g.fillStyle=K.sub;g.font=`20px ${FONT}`;g.fillText('측정: 벽까지 남은 거리 g',60,y+100);
   g.fillStyle=K.ink;g.font=`bold 36px ${FONT}`;g.fillText(d[2].map(v=>v<0?'충돌':`${+(T0-v).toFixed(1)}cm`).join(' · '),60,y+146);
   // 왼쪽 아래: ★과 모둠 빠름 단계
