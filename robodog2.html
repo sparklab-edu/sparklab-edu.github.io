@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8">
+<html lang="ko"><head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Crect width=%2248%22 height=%2248%22 rx=%229%22 fill=%22%23353a3f%22/%3E%3Cg fill=%22%23ffc20e%22 transform=%22translate(24 24) scale(.8) translate(-24 -21.8)%22%3E%3Ccircle cx=%2224%22 cy=%226.2%22 r=%223.6%22/%3E%3Crect x=%2222.5%22 y=%228%22 width=%223%22 height=%227%22/%3E%3Crect x=%223%22 y=%2222%22 width=%225%22 height=%2211%22 rx=%222%22/%3E%3Crect x=%2240%22 y=%2222%22 width=%225%22 height=%2211%22 rx=%222%22/%3E%3Cpath fill-rule=%22evenodd%22 d=%22M15 14H33A8 8 0 0 1 41 22V33A8 8 0 0 1 33 41H15A8 8 0 0 1 7 33V22A8 8 0 0 1 15 14ZM11.4 26.5A5.6 5.6 0 1 0 22.6 26.5A5.6 5.6 0 1 0 11.4 26.5ZM25.4 26.5A5.6 5.6 0 1 0 36.6 26.5A5.6 5.6 0 1 0 25.4 26.5ZM20.4 33.6H27.6A1.4 1.4 0 0 1 27.6 36.4H20.4A1.4 1.4 0 0 1 20.4 33.6Z%22/%3E%3Ccircle cx=%2217%22 cy=%2226.5%22 r=%222.4%22/%3E%3Ccircle cx=%2231%22 cy=%2226.5%22 r=%222.4%22/%3E%3C/g%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPARK LAB 수업</title>
 <!-- SPARK LAB 수업 슬라이드 틀. 내용은 lessons/<차시>.json 한 곳에만 쓴다(build.py가 아래 deck 자리표시자에 넣음).
@@ -37,6 +37,17 @@ h2{margin:0 0 18px;font-size:46px;letter-spacing:-.01em;line-height:1.25}
 .title h1{font-size:76px;margin:0 0 18px;letter-spacing:-.02em;line-height:1.2}
 .title .sub{font-size:34px;color:var(--sub)}
 .title .meta{margin-top:40px;font-size:26px;color:var(--sub);border-left:6px solid var(--zone);padding-left:14px}
+/* 브랜드 첫 쪽(title + "brand": true): 아스팔트 바탕, SPARK 로고, 단계 꼬리표. 규칙은 docs/브랜드-기준.md 4장 */
+.slide.brand,.mob .slide.brand{background:var(--asph);color:#f4f5f2}
+.brand .top{display:none}
+.brand .body{padding:56px 72px 60px;justify-content:flex-start;position:relative}
+.brand .logo{width:192px;display:block}
+.brand .gap{flex:1}
+.brand .tags{display:flex;gap:14px;margin-bottom:22px}.brand .tags img{height:58px;display:block}
+.brand h1{font-size:72px;margin:0;letter-spacing:-.02em;line-height:1.22;max-width:780px;position:relative}
+.brand .sub{font-size:32px;color:#d9dcd8;margin-top:16px;position:relative}
+.brand .meta{margin:0;border:0;padding:0;font-size:26px;color:#d9dcd8;position:relative}
+.brand .zz{position:absolute;left:56%;bottom:21%;width:62%;overflow:visible}
 /* 질문 */
 .ask .body{justify-content:center}
 .q{background:var(--zone-soft);border-left:10px solid var(--zone);padding:44px 52px;font-size:54px;font-weight:700;line-height:1.35;border-radius:4px}
@@ -130,6 +141,7 @@ svg .fadev{opacity:0;transition:opacity .4s .6s}svg .fadev.on{opacity:1}
   html,body{background:#fff;overflow:visible;height:auto}
   #stage{position:static;transform:none!important;width:auto;height:auto;background:none}
   .slide{display:flex!important;position:relative;width:1280px;height:720px;page-break-after:always;background:var(--concrete)}
+  .slide.brand{background:var(--asph)}
   .hide-step{opacity:1!important}.card .a{display:block}
   #ov,#notes,#hint,.bar{display:none!important}
   @page{size:1280px 720px;margin:0}
@@ -140,6 +152,7 @@ svg .fadev{opacity:0;transition:opacity .4s .6s}svg .fadev.on{opacity:1}
 <div id="notes"></div>
 <div id="hint">← → 넘기기 · O 목록 · N 노트 · T 타이머 · F 전체 화면</div>
 <script id="deck" type="application/json">{"title": "로보독 시운전과 성공 기준", "lit": [3], "slides": [{"type": "title", "title": "로보독이 무엇을 하면\n'성공'일까?", "sub": "로보독 시운전과 성공 기준"}, {"type": "activity", "h": "시운전", "minutes": 15, "task": ["시험 코스의 **우리 장소**에 장소 표지 두기", "판단 규칙 표의 다섯 상황을 하나씩 만들어 보기", "상황마다 **두 번씩** 돌려 보고 규칙대로 움직였는지 활동지에 쓰기", "이상한 줄은 블록을 고치고 다시"], "note": "코스는 모둠마다 차례로 · 기다리는 동안 책상 위에서 시험"}, {"type": "ask", "q": "같은 상황을 열 번 시험한다면\n몇 번을 '성공'이라고 셀 수 있을까?"}, {"type": "text", "h": "다른 모둠도 같게 셀 수 있는 성공 기준", "points": ["**얼마나**: 몇 cm 안에서, 몇 초 안에", "**무엇을**: 멈춘다, 소리를 낸다, 뒤로 간다", "**하지 않을 것**: 부딪히지 않는다"], "flow": ["상황", "*얼마나", "*무엇을", "성공"]}, {"type": "activity", "h": "우리 학급 성공 기준", "minutes": 11, "task": ["모둠 성공 기준을 한 문장으로 쓰기", "모둠마다 발표하고 다른 모둠이 같은 결과로 셀 수 있는지 묻기", "학급이 함께 **잘함 · 보통 · 다시** 세 칸 정하기"], "note": "정한 기준은 반복 테스트와 마지막 평가에 그대로 쓴다"}, {"type": "activity", "h": "반복 테스트 준비", "minutes": 12, "task": ["반복 테스트 앱 1단계에 반·모둠·번호와 **모둠 코드** 넣기", "**시험할 상황**(판단 규칙 표 한 줄)과 **성공 기준** 쓰기", "나오는 **모둠 코드**를 플랫폼에 올리기", "남는 시간: 그 상황으로 한두 번 미리 시험하기"], "note": "모둠 PC 한 대 · 다음 시간에 이 모둠 코드로 10회 테스트", "go": [{"label": "반복 테스트 앱 열기", "url": "https://sparklab-edu.github.io/repeat.html"}]}]}</script>
+<script></script>
 <script>
 const D=JSON.parse(document.getElementById('deck').textContent);
 const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
@@ -197,8 +210,15 @@ function mqSVG(fx,gy,s,o){
   `<circle cx="${X(wx)}" cy="${Y(wy)}" r="${L(3)}" fill="#5d646b"/></g>`;
 }
 /* 쪽 그리기 */
+// 로고·꼬리표 그림은 build.py가 brand/svg 파일을 BRAND_JS 자리에 넣는다(brand 쪽이 있는 차시만)
+const STAGE_NAME=['사회문제 발견','문제 탐구','AI·에이전트 설계','로봇 엔지니어링','공유·성찰'];
+function brandCover(s){
+  const tags=(D.lit||[]).map(j=>`<img src="${BRAND.tags[j]}" alt="${'SPARK'[j]} ${STAGE_NAME[j]}">`).join('');
+  return `<div class="body"><svg class="zz" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,20 20,5 40,20 60,5 80,20 100,5 120,20" fill="none" stroke="#ffc20e" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`+
+    `<img class="logo" src="${BRAND.logo}" alt="SPARK"><div class="gap"></div>${tags?`<div class="tags">${tags}</div>`:''}<h1>${md(s.title)}</h1>${s.sub?`<div class="sub">${md(s.sub)}</div>`:''}<div class="gap"></div><p class="meta">${md(s.meta||'1학년 정보')}</p></div>`;
+}
 const R={
-  title:s=>`<div class="body"><h1>${md(s.title)}</h1><div class="sub">${md(s.sub||'')}</div>${s.meta?`<div class="meta">${md(s.meta)}</div>`:''}</div>`,
+  title:s=>s.brand&&window.BRAND?brandCover(s):`<div class="body"><h1>${md(s.title)}</h1><div class="sub">${md(s.sub||'')}</div>${s.meta?`<div class="meta">${md(s.meta)}</div>`:''}</div>`,
   ask:s=>`<div class="body"><div class="q">${md(s.q)}${s.sub?`<span class="s">${md(s.sub)}</span>`:''}</div></div>`,
   text:s=>`<div class="body"><h2>${md(s.h)}</h2><ul class="pts">${s.points.map((p,i)=>`<li ${s.steps?`data-step="${i+1}"`:''}>${md(p)}</li>`).join('')}</ul>${s.flow?`<div class="flow" ${s.steps?`data-step="${s.points.length+1}"`:''}>${s.flow.map((f,i)=>`${i?'<i>→</i>':''}<span class="${f.startsWith('*')?'hl':''}">${esc(f.replace(/^\*/,''))}</span>`).join('')}</div>`:''}${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
   raw:s=>`<div class="body"><h2>${md(s.h)}</h2><pre class="raw">${s.lines.map((l,i)=>i===0?`<span class="c">${esc(l)}</span>`:esc(l)).join('\n')}</pre>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
@@ -223,7 +243,7 @@ const R={
   eval:s=>`<div class="body"><h2>${md(s.h)}</h2><table class="ev">${s.rows.map(r=>`<tr><th>${esc(r[0])}</th><td>${md(r[1])}</td></tr>`).join('')}</table>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
 };
 const stage=$('#stage');
-stage.innerHTML=D.slides.map((s,i)=>`<section class="slide ${s.type}" data-i="${i}"><div class="top"><span class="w">SPARK LAB</span><span class="st">${'SPARK'.split('').map((c,j)=>`<span class="${(D.lit||[]).includes(j)?'on':''}">${c}</span>`).join('')}</span><span class="t">${esc(D.title)}</span><a class="home" href="https://sparklab-edu.github.io/">수업 목록</a><span class="pg">${i+1} / ${D.slides.length}</span></div>${(R[s.type]||R.text)(s)}<div class="bar" style="width:${100*(i+1)/D.slides.length}%"></div></section>`).join('');
+stage.innerHTML=D.slides.map((s,i)=>`<section class="slide ${s.type}${s.brand&&window.BRAND?' brand':''}" data-i="${i}"><div class="top"><span class="w">SPARK LAB</span><span class="st">${'SPARK'.split('').map((c,j)=>`<span class="${(D.lit||[]).includes(j)?'on':''}">${c}</span>`).join('')}</span><span class="t">${esc(D.title)}</span><a class="home" href="https://sparklab-edu.github.io/">수업 목록</a><span class="pg">${i+1} / ${D.slides.length}</span></div>${(R[s.type]||R.text)(s)}<div class="bar" style="width:${100*(i+1)/D.slides.length}%"></div></section>`).join('');
 // 보기 바꾸기(같은 데이터를 표·막대·원으로)
 $$('.slide.viz').forEach(sec=>{const s=D.slides[+sec.dataset.i];const show=k=>{const v=s.views.find(x=>x.k===k);$$('.views button',sec).forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===k));
   const fig=$('.fig',sec);fig.dataset.pie=k==='pie'?'1':'';fig.innerHTML=k==='bar'?bar(s.data,{unit:s.unit}):k==='pie'?pie(s.data,0,{unit:s.unit}):k==='tree'?tree(s.tree):`<div style="padding:10px">${tableHTML(s.table)}</div>`;$('.qq',sec).innerHTML=md(v.q||'');$$('[data-step]',fig).forEach(e=>e.removeAttribute('data-step'));if(k==='bar'||k==='pie')playFig(fig,s.data,{unit:s.unit});};

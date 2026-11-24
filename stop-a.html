@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8">
+<html lang="ko"><head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Crect width=%2248%22 height=%2248%22 rx=%229%22 fill=%22%23353a3f%22/%3E%3Cg fill=%22%23ffc20e%22 transform=%22translate(24 24) scale(.8) translate(-24 -21.8)%22%3E%3Ccircle cx=%2224%22 cy=%226.2%22 r=%223.6%22/%3E%3Crect x=%2222.5%22 y=%228%22 width=%223%22 height=%227%22/%3E%3Crect x=%223%22 y=%2222%22 width=%225%22 height=%2211%22 rx=%222%22/%3E%3Crect x=%2240%22 y=%2222%22 width=%225%22 height=%2211%22 rx=%222%22/%3E%3Cpath fill-rule=%22evenodd%22 d=%22M15 14H33A8 8 0 0 1 41 22V33A8 8 0 0 1 33 41H15A8 8 0 0 1 7 33V22A8 8 0 0 1 15 14ZM11.4 26.5A5.6 5.6 0 1 0 22.6 26.5A5.6 5.6 0 1 0 11.4 26.5ZM25.4 26.5A5.6 5.6 0 1 0 36.6 26.5A5.6 5.6 0 1 0 25.4 26.5ZM20.4 33.6H27.6A1.4 1.4 0 0 1 27.6 36.4H20.4A1.4 1.4 0 0 1 20.4 33.6Z%22/%3E%3Ccircle cx=%2217%22 cy=%2226.5%22 r=%222.4%22/%3E%3Ccircle cx=%2231%22 cy=%2226.5%22 r=%222.4%22/%3E%3C/g%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPARK LAB 수업</title>
 <!-- SPARK LAB 수업 슬라이드 틀. 내용은 lessons/<차시>.json 한 곳에만 쓴다(build.py가 아래 deck 자리표시자에 넣음).
@@ -37,6 +37,17 @@ h2{margin:0 0 18px;font-size:46px;letter-spacing:-.01em;line-height:1.25}
 .title h1{font-size:76px;margin:0 0 18px;letter-spacing:-.02em;line-height:1.2}
 .title .sub{font-size:34px;color:var(--sub)}
 .title .meta{margin-top:40px;font-size:26px;color:var(--sub);border-left:6px solid var(--zone);padding-left:14px}
+/* 브랜드 첫 쪽(title + "brand": true): 아스팔트 바탕, SPARK 로고, 단계 꼬리표. 규칙은 docs/브랜드-기준.md 4장 */
+.slide.brand,.mob .slide.brand{background:var(--asph);color:#f4f5f2}
+.brand .top{display:none}
+.brand .body{padding:56px 72px 60px;justify-content:flex-start;position:relative}
+.brand .logo{width:192px;display:block}
+.brand .gap{flex:1}
+.brand .tags{display:flex;gap:14px;margin-bottom:22px}.brand .tags img{height:58px;display:block}
+.brand h1{font-size:72px;margin:0;letter-spacing:-.02em;line-height:1.22;max-width:780px;position:relative}
+.brand .sub{font-size:32px;color:#d9dcd8;margin-top:16px;position:relative}
+.brand .meta{margin:0;border:0;padding:0;font-size:26px;color:#d9dcd8;position:relative}
+.brand .zz{position:absolute;left:56%;bottom:21%;width:62%;overflow:visible}
 /* 질문 */
 .ask .body{justify-content:center}
 .q{background:var(--zone-soft);border-left:10px solid var(--zone);padding:44px 52px;font-size:54px;font-weight:700;line-height:1.35;border-radius:4px}
@@ -130,6 +141,7 @@ svg .fadev{opacity:0;transition:opacity .4s .6s}svg .fadev.on{opacity:1}
   html,body{background:#fff;overflow:visible;height:auto}
   #stage{position:static;transform:none!important;width:auto;height:auto;background:none}
   .slide{display:flex!important;position:relative;width:1280px;height:720px;page-break-after:always;background:var(--concrete)}
+  .slide.brand{background:var(--asph)}
   .hide-step{opacity:1!important}.card .a{display:block}
   #ov,#notes,#hint,.bar{display:none!important}
   @page{size:1280px 720px;margin:0}
@@ -140,6 +152,7 @@ svg .fadev{opacity:0;transition:opacity .4s .6s}svg .fadev.on{opacity:1}
 <div id="notes"></div>
 <div id="hint">← → 넘기기 · O 목록 · N 노트 · T 타이머 · F 전체 화면</div>
 <script id="deck" type="application/json">{"title": "순찰 로봇의 멈춤 기준과 판단 규칙", "lit": [1], "slides": [{"type": "title", "title": "로봇은 사람 앞\n몇 cm에서 멈춰야 할까?", "sub": "순찰 로봇의 멈춤 기준과 판단 규칙"}, {"type": "ask", "q": "우리 모둠 순찰 장소에서\n로봇이 늦게 멈추면 어떤 일이 생길까?"}, {"type": "tline", "h": "멈춤 기준 T", "T": 20, "bd": 15, "note": "T는 로봇이 멈춰 서는 곳이 아니라, **반응을 시작하는 거리**이다"}, {"type": "choose", "h": "벽까지 남은 거리는?", "cases": [{"t": "T = 20cm\n제동거리 15cm", "a": "5cm", "why": "20 − 15 = 5"}, {"t": "T = 20cm\n제동거리 23cm", "a": "충돌", "why": "제동거리가 T보다 길다"}, {"t": "T = 25cm\n제동거리 18cm", "a": "7cm", "why": "T를 늘리면 남는다"}]}, {"type": "text", "h": "평균, 중앙값, 최댓값", "steps": true, "points": ["**평균**은 모든 값을 더해 개수로 나눈 값이다", "**중앙값**은 값을 크기 순서로 늘어놓았을 때 가운데 값이다", "**최댓값**은 가장 큰 값이다"], "note": "충돌은 T 안에 멈추지 못한 것이라 어떤 측정값보다 길다"}, {"type": "activity", "h": "멈춤 기준 T 정하기", "minutes": 12, "task": ["정지거리 앱 **6단계** 열기", "평균이나 중앙값으로 정하면 몇 번 부딪히는지 세기", "대푯값과 여유로 **새 T** 정하고 근거 한 줄 쓰기(활동지 맨 위에도)", "새 T로 빠름 단계 한 번 더 달리기"], "go": [{"label": "정지거리 앱 열기", "url": "https://sparklab-edu.github.io/stopping.html"}]}, {"type": "ask", "q": "어느 값으로 정했을까?\n그 값을 고른 까닭은?"}, {"type": "text", "h": "판단 규칙에 멈춤 기준 넣기", "points": ["지난 판단 규칙은 주행, 부딪힘, 들어 올림에 할 행동이었다", "이번에는 **앞에 무언가가 T 안에 있음**을 더한다", "이 상황은 모델이 아니라 **초음파 센서**가 알아본다"], "flow": ["초음파 센서", "거리 \u003c T", "*판단", "모터"], "note": "선생님이 보여 주는 블록 묶음 하나만 더하고, T 숫자와 그 안의 행동만 바꾼다"}, {"type": "activity", "h": "판단 규칙 다시 묻기", "minutes": 10, "task": ["**[질문 틀 복사]**를 눌러 Gemini에 붙여 넣기", "빈칸 세 곳(측정한 최댓값, 새 T, 우리 장소) 채워 보내기", "보낸 글은 활동지 ②, 받은 표는 ①에 옮기고 **채택 여부** 정하기"], "note": "Gemini는 로봇 안에 없다. 정한 규칙은 우리가 블록으로 넣는다.", "go": [{"label": "Gemini 열기", "url": "https://gemini.google.com/"}], "copy": [{"label": "질문 틀 복사", "text": "우리는 중학생이고, 통학로를 순찰하는 작은 바퀴 로봇을 만들고 있어.\n로봇은 움직임을 보고 세 가지를 알아봐. 주행(바닥에서 가는 중), 부딪힘(무언가에 부딪힘), 들어 올림(누가 로봇을 듦).\n이번에는 앞쪽 초음파 센서로 거리도 재. 직접 재 보니 빠르게 갈 때 멈추라고 한 뒤에도 최대 [측정한 최댓값]cm를 더 갔어. 그래서 앞에 무언가가 [새 T]cm 안에 있으면 반응하게 하려고 해.\n우리 모둠의 순찰 장소에는 [지나가기 싫은 곳과 그 까닭]이 있어.\n로봇이 할 수 있는 행동은 천천히 앞으로 가기, 빠르게 앞으로 가기, 뒤로 가기, 돌기, 멈추기, 소리 내기, 불빛 켜기뿐이야.\n아래 다섯 상황마다 위 행동에서 골라, 아래 표로만 답해 줘.\n상황: 주행 / 부딪힘 / 들어 올림 / 앞에 무언가가 [새 T]cm 안에 있음 / 우리 장소에서 앞에 사람이 있음\n| 상황 | 로봇의 행동 | 이유(한 문장) |"}]}, {"type": "activity", "h": "마퀸에 넣고 시험하기", "minutes": 9, "task": ["멈춤 기준 블록에 **새 T**와 행동 넣기", "벽 앞에서 빠름으로 달려 T 안에서 반응하는지 보기", "결과를 활동지 ③에 쓰기", "채택 여부를 바꾼 줄이 있으면 까닭과 함께 쓰기"]}, {"type": "ask", "q": "멈춤 기준은 무엇으로 정했을까?\n판단 규칙은 누가 정했을까?", "sub": "마무리 카드에 쓰기"}]}</script>
+<script></script>
 <script>
 const D=JSON.parse(document.getElementById('deck').textContent);
 const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
@@ -197,8 +210,15 @@ function mqSVG(fx,gy,s,o){
   `<circle cx="${X(wx)}" cy="${Y(wy)}" r="${L(3)}" fill="#5d646b"/></g>`;
 }
 /* 쪽 그리기 */
+// 로고·꼬리표 그림은 build.py가 brand/svg 파일을 BRAND_JS 자리에 넣는다(brand 쪽이 있는 차시만)
+const STAGE_NAME=['사회문제 발견','문제 탐구','AI·에이전트 설계','로봇 엔지니어링','공유·성찰'];
+function brandCover(s){
+  const tags=(D.lit||[]).map(j=>`<img src="${BRAND.tags[j]}" alt="${'SPARK'[j]} ${STAGE_NAME[j]}">`).join('');
+  return `<div class="body"><svg class="zz" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,20 20,5 40,20 60,5 80,20 100,5 120,20" fill="none" stroke="#ffc20e" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`+
+    `<img class="logo" src="${BRAND.logo}" alt="SPARK"><div class="gap"></div>${tags?`<div class="tags">${tags}</div>`:''}<h1>${md(s.title)}</h1>${s.sub?`<div class="sub">${md(s.sub)}</div>`:''}<div class="gap"></div><p class="meta">${md(s.meta||'1학년 정보')}</p></div>`;
+}
 const R={
-  title:s=>`<div class="body"><h1>${md(s.title)}</h1><div class="sub">${md(s.sub||'')}</div>${s.meta?`<div class="meta">${md(s.meta)}</div>`:''}</div>`,
+  title:s=>s.brand&&window.BRAND?brandCover(s):`<div class="body"><h1>${md(s.title)}</h1><div class="sub">${md(s.sub||'')}</div>${s.meta?`<div class="meta">${md(s.meta)}</div>`:''}</div>`,
   ask:s=>`<div class="body"><div class="q">${md(s.q)}${s.sub?`<span class="s">${md(s.sub)}</span>`:''}</div></div>`,
   text:s=>`<div class="body"><h2>${md(s.h)}</h2><ul class="pts">${s.points.map((p,i)=>`<li ${s.steps?`data-step="${i+1}"`:''}>${md(p)}</li>`).join('')}</ul>${s.flow?`<div class="flow" ${s.steps?`data-step="${s.points.length+1}"`:''}>${s.flow.map((f,i)=>`${i?'<i>→</i>':''}<span class="${f.startsWith('*')?'hl':''}">${esc(f.replace(/^\*/,''))}</span>`).join('')}</div>`:''}${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
   raw:s=>`<div class="body"><h2>${md(s.h)}</h2><pre class="raw">${s.lines.map((l,i)=>i===0?`<span class="c">${esc(l)}</span>`:esc(l)).join('\n')}</pre>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
@@ -223,7 +243,7 @@ const R={
   eval:s=>`<div class="body"><h2>${md(s.h)}</h2><table class="ev">${s.rows.map(r=>`<tr><th>${esc(r[0])}</th><td>${md(r[1])}</td></tr>`).join('')}</table>${s.note?`<div class="note">${md(s.note)}</div>`:''}</div>`,
 };
 const stage=$('#stage');
-stage.innerHTML=D.slides.map((s,i)=>`<section class="slide ${s.type}" data-i="${i}"><div class="top"><span class="w">SPARK LAB</span><span class="st">${'SPARK'.split('').map((c,j)=>`<span class="${(D.lit||[]).includes(j)?'on':''}">${c}</span>`).join('')}</span><span class="t">${esc(D.title)}</span><a class="home" href="https://sparklab-edu.github.io/">수업 목록</a><span class="pg">${i+1} / ${D.slides.length}</span></div>${(R[s.type]||R.text)(s)}<div class="bar" style="width:${100*(i+1)/D.slides.length}%"></div></section>`).join('');
+stage.innerHTML=D.slides.map((s,i)=>`<section class="slide ${s.type}${s.brand&&window.BRAND?' brand':''}" data-i="${i}"><div class="top"><span class="w">SPARK LAB</span><span class="st">${'SPARK'.split('').map((c,j)=>`<span class="${(D.lit||[]).includes(j)?'on':''}">${c}</span>`).join('')}</span><span class="t">${esc(D.title)}</span><a class="home" href="https://sparklab-edu.github.io/">수업 목록</a><span class="pg">${i+1} / ${D.slides.length}</span></div>${(R[s.type]||R.text)(s)}<div class="bar" style="width:${100*(i+1)/D.slides.length}%"></div></section>`).join('');
 // 보기 바꾸기(같은 데이터를 표·막대·원으로)
 $$('.slide.viz').forEach(sec=>{const s=D.slides[+sec.dataset.i];const show=k=>{const v=s.views.find(x=>x.k===k);$$('.views button',sec).forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===k));
   const fig=$('.fig',sec);fig.dataset.pie=k==='pie'?'1':'';fig.innerHTML=k==='bar'?bar(s.data,{unit:s.unit}):k==='pie'?pie(s.data,0,{unit:s.unit}):k==='tree'?tree(s.tree):`<div style="padding:10px">${tableHTML(s.table)}</div>`;$('.qq',sec).innerHTML=md(v.q||'');$$('[data-step]',fig).forEach(e=>e.removeAttribute('data-step'));if(k==='bar'||k==='pie')playFig(fig,s.data,{unit:s.unit});};
