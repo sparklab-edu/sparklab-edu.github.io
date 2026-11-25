@@ -5,54 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SPARK LAB 중학교 정보 수업 도구</title>
 <meta name="description" content="통학로 공공데이터를 활용한 중학교 정보 교과 수업 도구(한별중학교)">
-<!-- info-class 첫 화면 원본(배포: sparklab-edu/sparklab-edu.github.io 의 index.html). 수업 순서대로 한 줄씩. 새 차시는 LESSONS 배열에 한 줄 더한다 -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;700&display=swap">
+<!-- 첫 화면 원본(배포: sparklab-edu/sparklab-edu.github.io 의 index.html). 수업 순서대로 LESSONS에 한 줄씩. 새 차시는 LESSONS에 한 줄 더한다.
+     로고·심볼·색 규칙은 docs/브랜드-기준.md. 학생도 들어오는 페이지라 연구회 이름은 넣지 않는다 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
 <style>
-  :root{--asph:#353a3f;--ink:#24282c;--sub:#5d646b;--line:#d5d8d3;--concrete:#ecedea;--paper:#fff;--zone:#ffc20e;--zone-soft:#fff4cf}
+  :root{--asph:#353a3f;--ink:#24282c;--sub:#5d646b;--faint:#8d949a;--line:#d5d8d3;--concrete:#ecedea;--paper:#fff;--zone:#ffc20e;--later:#b9beb8}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--concrete);color:var(--ink);font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-  main{max-width:820px;margin:0 auto;padding:40px 16px 56px}
-  .brand{font-weight:700;letter-spacing:.06em;color:var(--asph);font-size:15px}
-  h1{font-size:30px;margin:6px 0 4px}
-  .lead{color:var(--sub);margin:0 0 28px}
-  h2{font-size:15px;color:var(--sub);margin:32px 0 10px;font-weight:700}
-  ol.route{list-style:none;margin:0;padding:0}
-  ol.route li{display:grid;grid-template-columns:44px 1fr;gap:0 14px;position:relative}
-  /* 노선도: 번호 동그라미 + 이어지는 선 */
-  ol.route li::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:3px;background:var(--asph)}
-  ol.route li:first-child::before{top:30px}ol.route li:last-child::before{bottom:calc(100% - 30px)}
-  ol.route li.later::before{background:#b9beb8}
-  .n{position:relative;z-index:1;width:44px;height:44px;margin-top:8px;border-radius:50%;background:var(--paper);border:3px solid var(--asph);display:grid;place-items:center;font-weight:700;font-size:17px}
-  li.done .n{background:var(--asph);color:#fff}
-  li.later .n{border-color:#b9beb8;color:#8d949a}
-  .box{background:var(--paper);border-radius:6px;padding:16px 18px;margin-bottom:14px}
-  .when{font-size:13px;color:var(--sub)}
-  .t{font-size:20px;font-weight:700;margin:2px 0 4px}
-  .d{font-size:14px;color:var(--sub);margin:0 0 12px}
-  .links{display:flex;flex-wrap:wrap;gap:8px}
-  .links a{display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:5px;text-decoration:none;font-size:15px;font-weight:700}
-  .links a.go{background:var(--asph);color:#fff}
-  .links a.slide{background:var(--paper);color:var(--ink);border:1px solid #b9beb8}
-  .links a.ex{color:var(--ink);text-decoration:underline;font-weight:400;padding:0 6px}
-  li.later .t{color:#5d646b}
-  .note{font-size:13px;color:var(--sub);margin-top:24px;line-height:1.6}
+  body{margin:0;background:var(--concrete);color:var(--ink);font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all}
+  main{max-width:860px;margin:0 auto;padding:40px 16px 56px}
+  a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+  /* 머리: 심볼 + SPARK 글자 로고 + 세로줄 + LAB (브랜드 기준 3장 로크업 규칙: 심볼 높이 = 글자 로고 높이, 사이 0.3) */
+  .mark{display:flex;align-items:center;gap:15px}
+  .mark .sym{height:50px;width:auto;display:block}
+  .mark .wm{height:50px;width:auto;display:block}
+  .mark .lab{font-weight:700;font-size:21px;letter-spacing:.16em;line-height:1;padding-left:14px;border-left:2px solid var(--ink);align-self:stretch;display:flex;align-items:center}
+  h1{font-size:30px;margin:26px 0 4px;letter-spacing:-.01em}
+  .lead{color:var(--sub);margin:0;font-size:16px}
+
+  h2.sec{font-size:15px;color:var(--sub);margin:36px 0 10px;font-weight:700}
+
   /* 이번 주 수업 */
-  li.now .n{background:var(--zone);border-color:var(--asph)}
-  li.now .box{border-left:4px solid var(--zone)}
+  .now{display:grid;gap:10px}
+  .feat{background:var(--paper);border-left:6px solid var(--zone);border-radius:6px;padding:20px 24px 22px}
+  .feat .p{font-size:14px;color:var(--sub)}
+  .feat .t{font-size:24px;font-weight:700;margin:2px 0 6px;line-height:1.35}
+  .feat .d{font-size:15px;color:var(--sub);margin:0 0 16px;line-height:1.6}
+  .feat .links a{height:44px;font-size:16px}
+  .feat .links a:first-child{background:var(--zone);color:var(--ink);border-color:var(--zone)}
+
+  /* 전체 차시: 흰 면 하나 + 노선도 */
+  ol.route{list-style:none;margin:0;padding:6px 0;background:var(--paper);border-radius:6px}
+  ol.route li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:12px 20px;position:relative}
+  ol.route li+li{border-top:1px solid var(--line)}
+  ol.route li::before{content:"";position:absolute;left:35px;top:0;bottom:0;width:3px;background:var(--asph)}
+  ol.route li:first-child::before{top:50%}
+  ol.route li:last-child::before{bottom:50%}
+  ol.route li.later::before{background:var(--later)}
+  ol.route li.done+li.later::before{background:linear-gradient(var(--asph) 50%,var(--later) 50%)}
+  .n{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;background:var(--paper);border:3px solid var(--asph);display:grid;place-items:center;font-weight:700;font-size:14px}
+  li.done .n{background:var(--asph);color:#fff}
+  li.now .n{background:var(--zone)}
+  li.later .n{border-color:var(--later);color:var(--sub)}
+  .c{min-width:0}
+  .c .p{font-size:13px;color:var(--sub)}
+  .c .t{font-size:17px;font-weight:700;line-height:1.4}
+  .c .d{font-size:14px;color:var(--sub);margin:2px 0 0;line-height:1.55}
+  li.later .t{color:var(--sub)}
   .tag{display:inline-block;font-size:12px;font-weight:700;background:var(--zone);color:var(--ink);padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:2px}
+
+  .links{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .links a{display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:5px;text-decoration:none;font-size:15px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+  .links a.go{background:var(--asph);color:#fff}
+  .links a.slide{background:var(--paper);color:var(--ink);border-color:var(--later)}
+  .links a.ex{color:var(--ink);text-decoration:underline;font-weight:400;padding:0 4px}
+  .links .soon{font-size:14px;color:var(--sub)}
+  .note{font-size:13px;color:var(--sub);margin-top:14px;line-height:1.6}
+
   /* 소개 */
-  .about{margin-top:56px;padding-top:40px;border-top:3px solid var(--asph)}
+  .about{margin-top:64px;padding-top:40px;border-top:3px solid var(--asph)}
   .about h2{font-size:24px;color:var(--ink);margin:0 0 8px}
-  .about .lead2{font-size:17px;line-height:1.6;margin:0 0 32px;max-width:36em}
-  h2.sec{font-size:15px;color:var(--sub);margin:0 0 12px}
+  .about .lead2{font-size:17px;line-height:1.65;margin:0 0 32px;max-width:36em}
   .facts{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;margin:0;font-size:15px;line-height:1.6}
   .facts dt{font-weight:700}
   .facts dd{margin:0}
   .about h3{font-size:18px;margin:40px 0 12px}
-  .spark{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .spark{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
   .st{background:var(--paper);border-radius:6px;padding:14px 12px 16px;display:flex;flex-direction:column;gap:6px}
   .st .L{width:40px;height:40px;border-radius:4px;background:var(--zone);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:20px}
-  .st.wait .L{background:var(--concrete);color:#5d646b}
   .st .k{font-weight:700;font-size:15px;line-height:1.35}
   .st .e{font-size:12px;color:var(--sub)}
   .st .tool{margin-top:6px;padding-top:8px;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
@@ -60,9 +80,7 @@
   .st .tool a{color:var(--ink)}
   .st .tool span{color:var(--sub)}
   .flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin:0;padding:0;list-style:none}
-  .flow li{background:var(--paper);border-radius:4px;padding:8px 12px;font-weight:700;font-size:15px}
-  .flow li.wait{background:transparent;border:1px dashed #8d949a;color:var(--sub);font-weight:400}
-  .flow li{position:relative}
+  .flow li{background:var(--paper);border-radius:4px;padding:8px 12px;font-weight:700;font-size:15px;position:relative}
   .flow li+li{margin-left:20px}
   .flow li+li::before{content:"";position:absolute;left:-20px;top:50%;width:20px;height:3px;margin-top:-1.5px;background:var(--asph)}
   .fnote{font-size:14px;color:var(--sub);margin:10px 0 0}
@@ -74,7 +92,18 @@
   .use a{color:var(--ink)}
   footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--sub);line-height:1.7}
   footer .by{font-size:15px;color:var(--ink);font-weight:700}
+
   @media (max-width:720px){
+    main{padding-top:28px}
+    .mark{gap:11px}.mark .sym,.mark .wm{height:38px}.mark .lab{font-size:17px;padding-left:11px}
+    h1{font-size:25px;margin-top:20px}
+    .feat{padding:18px 18px 20px}.feat .t{font-size:21px}
+    ol.route li{grid-template-columns:34px minmax(0,1fr);padding:12px 14px;align-items:start}
+    ol.route li .n{margin-top:12px}
+    ol.route li:first-child::before{top:30px}
+    ol.route li:last-child::before{bottom:calc(100% - 30px)}
+    ol.route li::before{left:29px}
+    ol.route li .links{grid-column:2}
     .spark{grid-template-columns:1fr}
     .st{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;align-items:start}
     .st .L{grid-row:span 3}
@@ -83,7 +112,6 @@
     .flow{flex-direction:column;align-items:flex-start}
     .flow li+li{margin-left:0;margin-top:14px}
     .flow li+li::before{left:16px;top:-14px;width:3px;height:14px;margin-top:0}
-    h1{font-size:26px}
     .facts{grid-template-columns:1fr;gap:0}
     .facts dd{margin-bottom:8px}
   }
@@ -91,13 +119,21 @@
 </head>
 <body>
 <main>
-  <div class="brand">SPARK LAB</div>
-  <h1>중학교 정보 수업 도구</h1>
-  <p class="lead">한별중학교 1학년 정보 · 2026학년도 2학기</p>
-  <h2 class="sec">차시별 수업 자료</h2>
+  <header>
+    <div class="mark" role="img" aria-label="SPARK LAB">
+      <svg class="sym" viewBox="3 2.6 42 38.4" aria-hidden="true"><g fill="#24282c"><circle cx="24" cy="6.2" r="3.6"/><rect x="22.5" y="8" width="3" height="7"/><rect x="3" y="22" width="5" height="11" rx="2"/><rect x="40" y="22" width="5" height="11" rx="2"/><path fill-rule="evenodd" d="M15 14H33A8 8 0 0 1 41 22V33A8 8 0 0 1 33 41H15A8 8 0 0 1 7 33V22A8 8 0 0 1 15 14ZM11.4 26.5A5.6 5.6 0 1 0 22.6 26.5A5.6 5.6 0 1 0 11.4 26.5ZM25.4 26.5A5.6 5.6 0 1 0 36.6 26.5A5.6 5.6 0 1 0 25.4 26.5ZM20.4 33.6H27.6A1.4 1.4 0 0 1 27.6 36.4H20.4A1.4 1.4 0 0 1 20.4 33.6Z"/><circle cx="17" cy="26.5" r="2.4"/><circle cx="31" cy="26.5" r="2.4"/></g></svg>
+      <img class="wm" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNTA3LjEycHQiIGhlaWdodD0iMTY4cHQiIHZpZXdCb3g9IjAgMCA1MDcuMTIgMTY4Ij4KPGRlZnM+CjxnPgo8ZyBpZD0iZ2x5cGgtMC0wIj4KPHBhdGggZD0iTSA0NC42MjUgMS4xNzE4NzUgQyAzNi40NzY1NjIgMS4xNzE4NzUgMjkuMzgyODEyIC0wLjEyNSAyMy4zNDM3NSAtMi43MTg3NSBDIDE3LjMwMDc4MSAtNS4zMjAzMTIgMTIuNjMyODEyIC05LjA1MDc4MSA5LjM0Mzc1IC0xMy45MDYyNSBDIDYuMDYyNSAtMTguNzY5NTMxIDQuNDIxODc1IC0yNC4zOTQ1MzEgNC40MjE4NzUgLTMwLjc4MTI1IEwgNC40MjE4NzUgLTMzLjU3ODEyNSBDIDQuNDIxODc1IC0zNC4wNjY0MDYgNC41OTM3NSAtMzQuNDg0Mzc1IDQuOTM3NSAtMzQuODI4MTI1IEMgNS4yODEyNSAtMzUuMTcxODc1IDUuNjk1MzEyIC0zNS4zNDM3NSA2LjE4NzUgLTM1LjM0Mzc1IEwgMjYuNjU2MjUgLTM1LjM0Mzc1IEMgMjcuMTQ0NTMxIC0zNS4zNDM3NSAyNy41NjI1IC0zNS4xNzE4NzUgMjcuOTA2MjUgLTM0LjgyODEyNSBDIDI4LjI1IC0zNC40ODQzNzUgMjguNDIxODc1IC0zNC4wNjY0MDYgMjguNDIxODc1IC0zMy41NzgxMjUgTCAyOC40MjE4NzUgLTMxLjgxMjUgQyAyOC40MjE4NzUgLTI4LjU3MDMxMiAzMC4wMzkwNjIgLTI1Ljc1IDMzLjI4MTI1IC0yMy4zNDM3NSBDIDM2LjUxOTUzMSAtMjAuOTM3NSA0MC44OTA2MjUgLTE5LjczNDM3NSA0Ni4zOTA2MjUgLTE5LjczNDM3NSBDIDUwLjcxMDkzOCAtMTkuNzM0Mzc1IDUzLjkwNjI1IC0yMC42NjQwNjIgNTUuOTY4NzUgLTIyLjUzMTI1IEMgNTguMDMxMjUgLTI0LjM5NDUzMSA1OS4wNjI1IC0yNi41NTQ2ODggNTkuMDYyNSAtMjkuMDE1NjI1IEMgNTkuMDYyNSAtMzAuOTcyNjU2IDU4LjQ0NTMxMiAtMzIuNTY2NDA2IDU3LjIxODc1IC0zMy43OTY4NzUgQyA1NS45ODgyODEgLTM1LjAyMzQzOCA1NC4zNDM3NSAtMzYuMDU0Njg4IDUyLjI4MTI1IC0zNi44OTA2MjUgQyA1MC4yMTg3NSAtMzcuNzIyNjU2IDQ3LjAzMTI1IC0zOC44Nzg5MDYgNDIuNzE4NzUgLTQwLjM1OTM3NSBDIDQyLjEyNSAtNDAuNjQ4NDM4IDQxLjUzMTI1IC00MC44NjcxODggNDAuOTM3NSAtNDEuMDE1NjI1IEMgNDAuMzUxNTYyIC00MS4xNjAxNTYgMzkuODE2NDA2IC00MS4zMzIwMzEgMzkuMzI4MTI1IC00MS41MzEyNSBDIDMyLjk0MTQwNiAtNDMuNTkzNzUgMjcuMzkwNjI1IC00NS44MjgxMjUgMjIuNjcxODc1IC00OC4yMzQzNzUgQyAxNy45NjA5MzggLTUwLjY0MDYyNSAxMy45Mzc1IC01My45NzY1NjIgMTAuNTkzNzUgLTU4LjI1IEMgNy4yNTc4MTIgLTYyLjUxOTUzMSA1LjU5Mzc1IC02Ny43OTY4NzUgNS41OTM3NSAtNzQuMDc4MTI1IEMgNS41OTM3NSAtODAuMTcxODc1IDcuMTg3NSAtODUuNSAxMC4zNzUgLTkwLjA2MjUgQyAxMy41NzAzMTIgLTk0LjYyNSAxOC4wMTU2MjUgLTk4LjEzMjgxMiAyMy43MDMxMjUgLTEwMC41OTM3NSBDIDI5LjM5ODQzOCAtMTAzLjA1MDc4MSAzNS44MzIwMzEgLTEwNC4yODEyNSA0MyAtMTA0LjI4MTI1IEMgNTAuNTYyNSAtMTA0LjI4MTI1IDU3LjM2MzI4MSAtMTAyLjkwNjI1IDYzLjQwNjI1IC0xMDAuMTU2MjUgQyA2OS40NDUzMTIgLTk3LjQwNjI1IDc0LjE3OTY4OCAtOTMuNTIzNDM4IDc3LjYwOTM3NSAtODguNTE1NjI1IEMgODEuMDQ2ODc1IC04My41MDM5MDYgODIuNzY1NjI1IC03Ny43NTc4MTIgODIuNzY1NjI1IC03MS4yODEyNSBMIDgyLjc2NTYyNSAtNjkuMjE4NzUgQyA4Mi43NjU2MjUgLTY4LjcyNjU2MiA4Mi41OTM3NSAtNjguMzEyNSA4Mi4yNSAtNjcuOTY4NzUgQyA4MS45MDYyNSAtNjcuNjI1IDgxLjQ4ODI4MSAtNjcuNDUzMTI1IDgxIC02Ny40NTMxMjUgTCA2MC41MzEyNSAtNjcuNDUzMTI1IEMgNjAuMDM5MDYyIC02Ny40NTMxMjUgNTkuNjI1IC02Ny42MjUgNTkuMjgxMjUgLTY3Ljk2ODc1IEMgNTguOTM3NSAtNjguMzEyNSA1OC43NjU2MjUgLTY4LjcyNjU2MiA1OC43NjU2MjUgLTY5LjIxODc1IEwgNTguNzY1NjI1IC03MC4yNSBDIDU4Ljc2NTYyNSAtNzMuNjg3NSA1Ny4yNDIxODggLTc2LjcyNjU2MiA1NC4yMDMxMjUgLTc5LjM3NSBDIDUxLjE2MDE1NiAtODIuMDMxMjUgNDcuMDgyMDMxIC04My4zNTkzNzUgNDEuOTY4NzUgLTgzLjM1OTM3NSBDIDM4LjE0NDUzMSAtODMuMzU5Mzc1IDM1LjE0ODQzOCAtODIuNTcwMzEyIDMyLjk4NDM3NSAtODEgQyAzMC44MjgxMjUgLTc5LjQyNTc4MSAyOS43NSAtNzcuMjE4NzUgMjkuNzUgLTc0LjM3NSBDIDI5Ljc1IC03Mi4yMTg3NSAzMC40Mzc1IC03MC40MjU3ODEgMzEuODEyNSAtNjkgQyAzMy4xODc1IC02Ny41NzAzMTIgMzUuMzIwMzEyIC02Ni4yNDIxODggMzguMjE4NzUgLTY1LjAxNTYyNSBDIDQxLjExMzI4MSAtNjMuNzk2ODc1IDQ1LjU1NDY4OCAtNjIuMjAzMTI1IDUxLjU0Njg3NSAtNjAuMjM0Mzc1IEMgNTguNDIxODc1IC01Ny44Nzg5MDYgNjMuNzY5NTMxIC01NS44MTY0MDYgNjcuNTkzNzUgLTU0LjA0Njg3NSBDIDcxLjQyNTc4MSAtNTIuMjg1MTU2IDc1LjAzNTE1NiAtNDkuNDE0MDYyIDc4LjQyMTg3NSAtNDUuNDM3NSBDIDgxLjgxNjQwNiAtNDEuNDU3MDMxIDgzLjUxNTYyNSAtMzYuMjI2NTYyIDgzLjUxNTYyNSAtMjkuNzUgQyA4My41MTU2MjUgLTIzLjM2MzI4MSA4MS44OTA2MjUgLTE3Ljg2MzI4MSA3OC42NDA2MjUgLTEzLjI1IEMgNzUuMzk4NDM4IC04LjYzMjgxMiA3MC44NTkzNzUgLTUuMDc4MTI1IDY1LjAxNTYyNSAtMi41NzgxMjUgQyA1OS4xNzk2ODggLTAuMDc4MTI1IDUyLjM4MjgxMiAxLjE3MTg3NSA0NC42MjUgMS4xNzE4NzUgWiBNIDQ0LjYyNSAxLjE3MTg3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMC0xIj4KPHBhdGggZD0iTSA1MS4xMDkzNzUgLTEwMy4wOTM3NSBDIDU3Ljc4NTE1NiAtMTAzLjA5Mzc1IDYzLjcwMzEyNSAtMTAxLjcxODc1IDY4Ljg1OTM3NSAtOTguOTY4NzUgQyA3NC4wMTU2MjUgLTk2LjIxODc1IDc3Ljk4ODI4MSAtOTIuMzYzMjgxIDgwLjc4MTI1IC04Ny40MDYyNSBDIDgzLjU4MjAzMSAtODIuNDQ1MzEyIDg0Ljk4NDM3NSAtNzYuNzI2NTYyIDg0Ljk4NDM3NSAtNzAuMjUgQyA4NC45ODQzNzUgLTYzLjg3NSA4My41MzUxNTYgLTU4LjIyNjU2MiA4MC42NDA2MjUgLTUzLjMxMjUgQyA3Ny43NDIxODggLTQ4LjQwNjI1IDczLjY0NDUzMSAtNDQuNjI1IDY4LjM0Mzc1IC00MS45Njg3NSBDIDYzLjAzOTA2MiAtMzkuMzIwMzEyIDU2Ljg5ODQzOCAtMzggNDkuOTIxODc1IC0zOCBMIDMxLjk1MzEyNSAtMzggQyAzMS40NjA5MzggLTM4IDMxLjIxODc1IC0zNy43NTM5MDYgMzEuMjE4NzUgLTM3LjI2NTYyNSBMIDMxLjIxODc1IC0xLjc2NTYyNSBDIDMxLjIxODc1IC0xLjI3MzQzOCAzMS4wNDY4NzUgLTAuODU5Mzc1IDMwLjcwMzEyNSAtMC41MTU2MjUgQyAzMC4zNTkzNzUgLTAuMTcxODc1IDI5Ljk0MTQwNiAwIDI5LjQ1MzEyNSAwIEwgOC41NDY4NzUgMCBDIDguMDU0Njg4IDAgNy42NDA2MjUgLTAuMTcxODc1IDcuMjk2ODc1IC0wLjUxNTYyNSBDIDYuOTUzMTI1IC0wLjg1OTM3NSA2Ljc4MTI1IC0xLjI3MzQzOCA2Ljc4MTI1IC0xLjc2NTYyNSBMIDYuNzgxMjUgLTEwMS4zMjgxMjUgQyA2Ljc4MTI1IC0xMDEuODE2NDA2IDYuOTUzMTI1IC0xMDIuMjM0Mzc1IDcuMjk2ODc1IC0xMDIuNTc4MTI1IEMgNy42NDA2MjUgLTEwMi45MjE4NzUgOC4wNTQ2ODggLTEwMy4wOTM3NSA4LjU0Njg3NSAtMTAzLjA5Mzc1IFogTSA0Ny4xMjUgLTU3LjQzNzUgQyA1MS4xNTYyNSAtNTcuNDM3NSA1NC40MjE4NzUgLTU4LjU2NjQwNiA1Ni45MjE4NzUgLTYwLjgyODEyNSBDIDU5LjQyOTY4OCAtNjMuMDg1OTM4IDYwLjY4NzUgLTY2LjAzMTI1IDYwLjY4NzUgLTY5LjY1NjI1IEMgNjAuNjg3NSAtNzMuMzk0NTMxIDU5LjQyOTY4OCAtNzYuNDE0MDYyIDU2LjkyMTg3NSAtNzguNzE4NzUgQyA1NC40MjE4NzUgLTgxLjAzMTI1IDUxLjE1NjI1IC04Mi4xODc1IDQ3LjEyNSAtODIuMTg3NSBMIDMxLjk1MzEyNSAtODIuMTg3NSBDIDMxLjQ2MDkzOCAtODIuMTg3NSAzMS4yMTg3NSAtODEuOTQxNDA2IDMxLjIxODc1IC04MS40NTMxMjUgTCAzMS4yMTg3NSAtNTguMTcxODc1IEMgMzEuMjE4NzUgLTU3LjY3OTY4OCAzMS40NjA5MzggLTU3LjQzNzUgMzEuOTUzMTI1IC01Ny40Mzc1IFogTSA0Ny4xMjUgLTU3LjQzNzUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTAtMiI+CjxwYXRoIGQ9Ik0gNzQuNTMxMjUgMCBDIDczLjQ0NTMxMiAwIDcyLjc1NzgxMiAtMC40ODgyODEgNzIuNDY4NzUgLTEuNDY4NzUgTCA2OC42NDA2MjUgLTE0LjU3ODEyNSBDIDY4LjQ0MTQwNiAtMTQuOTcyNjU2IDY4LjE5MTQwNiAtMTUuMTcxODc1IDY3Ljg5MDYyNSAtMTUuMTcxODc1IEwgMzQuMzEyNSAtMTUuMTcxODc1IEMgMzQuMDE5NTMxIC0xNS4xNzE4NzUgMzMuNzczNDM4IC0xNC45NzI2NTYgMzMuNTc4MTI1IC0xNC41NzgxMjUgTCAyOS43NSAtMS40Njg3NSBDIDI5LjQ1NzAzMSAtMC40ODgyODEgMjguNzY5NTMxIDAgMjcuNjg3NSAwIEwgNS4xNTYyNSAwIEMgNC41NjI1IDAgNC4xMTcxODggLTAuMTcxODc1IDMuODI4MTI1IC0wLjUxNTYyNSBDIDMuNTM1MTU2IC0wLjg1OTM3NSAzLjQ4ODI4MSAtMS4zNzUgMy42ODc1IC0yLjA2MjUgTCAzNS4yMDMxMjUgLTEwMS42MjUgQyAzNS40OTIxODggLTEwMi42MDE1NjIgMzYuMTI4OTA2IC0xMDMuMDkzNzUgMzcuMTA5Mzc1IC0xMDMuMDkzNzUgTCA2NC45NTMxMjUgLTEwMy4wOTM3NSBDIDY1LjkyOTY4OCAtMTAzLjA5Mzc1IDY2LjU2NjQwNiAtMTAyLjYwMTU2MiA2Ni44NTkzNzUgLTEwMS42MjUgTCA5OC41MzEyNSAtMi4wNjI1IEMgOTguNjI1IC0xLjg2MzI4MSA5OC42NzE4NzUgLTEuNjE3MTg4IDk4LjY3MTg3NSAtMS4zMjgxMjUgQyA5OC42NzE4NzUgLTAuNDQxNDA2IDk4LjEzMjgxMiAwIDk3LjA2MjUgMCBaIE0gMzkuNDY4NzUgLTM0LjkwNjI1IEMgMzkuMzc1IC0zNC4zMTI1IDM5LjU3MDMxMiAtMzQuMDE1NjI1IDQwLjA2MjUgLTM0LjAxNTYyNSBMIDYyIC0zNC4wMTU2MjUgQyA2Mi41OTM3NSAtMzQuMDE1NjI1IDYyLjc4OTA2MiAtMzQuMzEyNSA2Mi41OTM3NSAtMzQuOTA2MjUgTCA1MS40MDYyNSAtNzIuNzUgQyA1MS4zMDA3ODEgLTczLjE0NDUzMSA1MS4xNDg0MzggLTczLjMxNjQwNiA1MC45NTMxMjUgLTczLjI2NTYyNSBDIDUwLjc2NTYyNSAtNzMuMjIyNjU2IDUwLjYxNzE4OCAtNzMuMDUwNzgxIDUwLjUxNTYyNSAtNzIuNzUgWiBNIDM5LjQ2ODc1IC0zNC45MDYyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMC0zIj4KPHBhdGggZD0iTSA2Mi40NTMxMjUgMCBDIDYxLjQ2MDkzOCAwIDYwLjc3MzQzOCAtMC40NDE0MDYgNjAuMzkwNjI1IC0xLjMyODEyNSBMIDQzIC00MC41IEMgNDIuODEyNSAtNDAuODk0NTMxIDQyLjUxOTUzMSAtNDEuMDkzNzUgNDIuMTI1IC00MS4wOTM3NSBMIDMyLjQwNjI1IC00MS4wOTM3NSBDIDMxLjkxNDA2MiAtNDEuMDkzNzUgMzEuNjcxODc1IC00MC44NDc2NTYgMzEuNjcxODc1IC00MC4zNTkzNzUgTCAzMS42NzE4NzUgLTEuNzY1NjI1IEMgMzEuNjcxODc1IC0xLjI3MzQzOCAzMS41IC0wLjg1OTM3NSAzMS4xNTYyNSAtMC41MTU2MjUgQyAzMC44MTI1IC0wLjE3MTg3NSAzMC4zOTA2MjUgMCAyOS44OTA2MjUgMCBMIDguOTg0Mzc1IDAgQyA4LjQ5MjE4OCAwIDguMDc4MTI1IC0wLjE3MTg3NSA3LjczNDM3NSAtMC41MTU2MjUgQyA3LjM5MDYyNSAtMC44NTkzNzUgNy4yMTg3NSAtMS4yNzM0MzggNy4yMTg3NSAtMS43NjU2MjUgTCA3LjIxODc1IC0xMDEuMzI4MTI1IEMgNy4yMTg3NSAtMTAxLjgxNjQwNiA3LjM5MDYyNSAtMTAyLjIzNDM3NSA3LjczNDM3NSAtMTAyLjU3ODEyNSBDIDguMDc4MTI1IC0xMDIuOTIxODc1IDguNDkyMTg4IC0xMDMuMDkzNzUgOC45ODQzNzUgLTEwMy4wOTM3NSBMIDUyLjczNDM3NSAtMTAzLjA5Mzc1IEMgNTkuMjEwOTM4IC0xMDMuMDkzNzUgNjQuOTA2MjUgLTEwMS43NjU2MjUgNjkuODEyNSAtOTkuMTA5Mzc1IEMgNzQuNzE4NzUgLTk2LjQ2MDkzOCA3OC41MTk1MzEgLTkyLjcwNzAzMSA4MS4yMTg3NSAtODcuODQzNzUgQyA4My45MjU3ODEgLTgyLjk4ODI4MSA4NS4yODEyNSAtNzcuNDIxODc1IDg1LjI4MTI1IC03MS4xNDA2MjUgQyA4NS4yODEyNSAtNjQuNTU0Njg4IDgzLjY2MDE1NiAtNTguODU5Mzc1IDgwLjQyMTg3NSAtNTQuMDQ2ODc1IEMgNzcuMTc5Njg4IC00OS4yMzQzNzUgNzIuNjYwMTU2IC00NS43NSA2Ni44NTkzNzUgLTQzLjU5Mzc1IEMgNjYuMzY3MTg4IC00My4zOTQ1MzEgNjYuMjIyNjU2IC00My4wNTA3ODEgNjYuNDIxODc1IC00Mi41NjI1IEwgODUuODU5Mzc1IC0yLjA2MjUgQyA4Ni4wNTQ2ODggLTEuNjY0MDYyIDg2LjE1NjI1IC0xLjM2NzE4OCA4Ni4xNTYyNSAtMS4xNzE4NzUgQyA4Ni4xNTYyNSAtMC4zOTA2MjUgODUuNjE3MTg4IDAgODQuNTQ2ODc1IDAgWiBNIDMyLjQwNjI1IC04Mi4xODc1IEMgMzEuOTE0MDYyIC04Mi4xODc1IDMxLjY3MTg3NSAtODEuOTQxNDA2IDMxLjY3MTg3NSAtODEuNDUzMTI1IEwgMzEuNjcxODc1IC02MC41MzEyNSBDIDMxLjY3MTg3NSAtNjAuMDM5MDYyIDMxLjkxNDA2MiAtNTkuNzk2ODc1IDMyLjQwNjI1IC01OS43OTY4NzUgTCA0OC43NSAtNTkuNzk2ODc1IEMgNTIuMzgyODEyIC01OS43OTY4NzUgNTUuMzI4MTI1IC02MC44MDA3ODEgNTcuNTc4MTI1IC02Mi44MTI1IEMgNTkuODM1OTM4IC02NC44MjAzMTIgNjAuOTY4NzUgLTY3LjUgNjAuOTY4NzUgLTcwLjg0Mzc1IEMgNjAuOTY4NzUgLTc0LjI4MTI1IDU5LjgzNTkzOCAtNzcuMDMxMjUgNTcuNTc4MTI1IC03OS4wOTM3NSBDIDU1LjMyODEyNSAtODEuMTU2MjUgNTIuMzgyODEyIC04Mi4xODc1IDQ4Ljc1IC04Mi4xODc1IFogTSAzMi40MDYyNSAtODIuMTg3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMC00Ij4KPHBhdGggZD0iTSA4Ljk4NDM3NSAwIEMgOC40OTIxODggMCA4LjA3ODEyNSAtMC4xNzE4NzUgNy43MzQzNzUgLTAuNTE1NjI1IEMgNy4zOTA2MjUgLTAuODU5Mzc1IDcuMjE4NzUgLTEuMjczNDM4IDcuMjE4NzUgLTEuNzY1NjI1IEwgNy4yMTg3NSAtMTAxLjMyODEyNSBDIDcuMjE4NzUgLTEwMS44MTY0MDYgNy4zOTA2MjUgLTEwMi4yMzQzNzUgNy43MzQzNzUgLTEwMi41NzgxMjUgQyA4LjA3ODEyNSAtMTAyLjkyMTg3NSA4LjQ5MjE4OCAtMTAzLjA5Mzc1IDguOTg0Mzc1IC0xMDMuMDkzNzUgTCAyOS44OTA2MjUgLTEwMy4wOTM3NSBDIDMwLjM5MDYyNSAtMTAzLjA5Mzc1IDMwLjgxMjUgLTEwMi45MjE4NzUgMzEuMTU2MjUgLTEwMi41NzgxMjUgQyAzMS41IC0xMDIuMjM0Mzc1IDMxLjY3MTg3NSAtMTAxLjgxNjQwNiAzMS42NzE4NzUgLTEwMS4zMjgxMjUgTCAzMS42NzE4NzUgLTYzLjAzMTI1IEMgMzEuNjcxODc1IC02Mi43MzgyODEgMzEuNzY1NjI1IC02Mi41NjY0MDYgMzEuOTUzMTI1IC02Mi41MTU2MjUgQyAzMi4xNDg0MzggLTYyLjQ3MjY1NiAzMi4zNDc2NTYgLTYyLjU0Njg3NSAzMi41NDY4NzUgLTYyLjczNDM3NSBMIDYyLjI5Njg3NSAtMTAyLjA2MjUgQyA2Mi44OTA2MjUgLTEwMi43NSA2My41NzgxMjUgLTEwMy4wOTM3NSA2NC4zNTkzNzUgLTEwMy4wOTM3NSBMIDg4LjIxODc1IC0xMDMuMDkzNzUgQyA4OS4xOTUzMTIgLTEwMy4wOTM3NSA4OS42ODc1IC0xMDIuNzUgODkuNjg3NSAtMTAyLjA2MjUgQyA4OS42ODc1IC0xMDEuNzY5NTMxIDg5LjUzOTA2MiAtMTAxLjM3ODkwNiA4OS4yNSAtMTAwLjg5MDYyNSBMIDU3LjQzNzUgLTU4LjMyODEyNSBDIDU3LjIzODI4MSAtNTcuOTI5Njg4IDU3LjE5MTQwNiAtNTcuNTg1OTM4IDU3LjI5Njg3NSAtNTcuMjk2ODc1IEwgOTAuNTc4MTI1IC0yLjA2MjUgQyA5MC43NzM0MzggLTEuNDY4NzUgOTAuODc1IC0xLjEyNSA5MC44NzUgLTEuMDMxMjUgQyA5MC44NzUgLTAuMzQzNzUgOTAuMzgyODEyIDAgODkuNDA2MjUgMCBMIDY1Ljk4NDM3NSAwIEMgNjQuODk4NDM4IDAgNjQuMTYwMTU2IC0wLjM5MDYyNSA2My43NjU2MjUgLTEuMTcxODc1IEwgNDAuNjU2MjUgLTQwLjUgQyA0MC4zNTE1NjIgLTQxLjA5Mzc1IDQwLjAwNzgxMiAtNDEuMDkzNzUgMzkuNjI1IC00MC41IEwgMzEuOTUzMTI1IC0zMC4wNDY4NzUgQyAzMS43NjU2MjUgLTI5LjY0ODQzOCAzMS42NzE4NzUgLTI5LjM1MTU2MiAzMS42NzE4NzUgLTI5LjE1NjI1IEwgMzEuNjcxODc1IC0xLjc2NTYyNSBDIDMxLjY3MTg3NSAtMS4yNzM0MzggMzEuNSAtMC44NTkzNzUgMzEuMTU2MjUgLTAuNTE1NjI1IEMgMzAuODEyNSAtMC4xNzE4NzUgMzAuMzkwNjI1IDAgMjkuODkwNjI1IDAgWiBNIDguOTg0Mzc1IDAgIi8+CjwvZz4KPC9nPgo8L2RlZnM+CjxnIGZpbGw9InJnYigxNC4xMTg5NTglLCAxNS42ODkwODclLCAxNy4yNDg1MzUlKSIgZmlsbC1vcGFjaXR5PSIxIj4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0wIiB4PSItMC4wMDAwMDAwMDAwMDAwMDg2NiIgeT0iMTA2LjE5MzU3Ii8+CjwvZz4KPGcgZmlsbD0icmdiKDE0LjExODk1OCUsIDE1LjY4OTA4NyUsIDE3LjI0ODUzNSUpIiBmaWxsLW9wYWNpdHk9IjEiPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0wLTEiIHg9Ijk3LjA3MjYzNyIgeT0iMTA2LjE5MzU3Ii8+CjwvZz4KPGcgZmlsbD0icmdiKDE0LjExODk1OCUsIDE1LjY4OTA4NyUsIDE3LjI0ODUzNSUpIiBmaWxsLW9wYWNpdHk9IjEiPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0wLTIiIHg9IjE5My45OTU2ODYiIHk9IjEwNi4xOTM1NyIvPgo8L2c+CjxnIGZpbGw9InJnYigxNC4xMTg5NTglLCAxNS42ODkwODclLCAxNy4yNDg1MzUlKSIgZmlsbC1vcGFjaXR5PSIxIj4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0zIiB4PSIzMDUuMDYwNzc1IiB5PSIxMDYuMTkzNTciLz4KPC9nPgo8ZyBmaWxsPSJyZ2IoMTQuMTE4OTU4JSwgMTUuNjg5MDg3JSwgMTcuMjQ4NTM1JSkiIGZpbGwtb3BhY2l0eT0iMSI+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTAtNCIgeD0iNDA0LjM0Mjc0NiIgeT0iMTA2LjE5MzU3Ii8+CjwvZz4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9InJnYigxNC4xMTg5NTglLCAxNS42ODkwODclLCAxNy4yNDg1MzUlKSIgc3Ryb2tlLW9wYWNpdHk9IjEiIHN0cm9rZS1taXRlcmxpbWl0PSI0IiBkPSJNIDcuMDAxNTQzIDI1MC45OTkwNjcgTCAxMjUuODEwMjk1IDIxMS4wMDAxMDMgTCAyNTcuNDE4MDggMjUwLjk5OTA2NyBMIDQwOC4yMzIzNjkgMjExLjAwMDEwMyBMIDU0My4wNDkxOTQgMjUwLjk5OTA2NyBMIDY2OC4yNDk1MDYgMjExLjAwMDEwMyAiIHRyYW5zZm9ybT0ibWF0cml4KDAuNzM2NDQ1LCAwLCAwLCAwLjczNjQ0NSwgLTAuMDAwMDAwMDAwMDAwMDA4NjYsIC0yNi4zNjY1MDEpIi8+Cjwvc3ZnPgo=" alt="">
+      <span class="lab" aria-hidden="true">LAB</span>
+    </div>
+    <h1>중학교 정보 수업 도구</h1>
+    <p class="lead">한별중학교 1학년 정보 · 2026학년도 2학기</p>
+  </header>
 
+  <h2 class="sec" id="nowh">이번 주 수업</h2>
+  <div class="now" id="now"></div>
+
+  <h2 class="sec">전체 차시</h2>
   <ol class="route" id="route"></ol>
-
   <p class="note"><b>활동 열기</b>: 학생 활동 화면 &nbsp; <b>수업 슬라이드</b>: 교사 수업 화면(← → 키로 넘김) &nbsp; <b>완성 예시</b>: 저장하지 않는 시연 화면(휴대폰 지원)</p>
 
   <section class="about">
@@ -114,15 +150,15 @@
       <div class="st"><div class="L">S</div><div class="k">사회문제 발견</div><div class="e">Social Problem Finding</div><div class="tool"><b>통학로 진단</b><a href="route.html#sample">완성 예시</a><br><span>문제 정의(통학로 진단 내)</span></div></div>
       <div class="st"><div class="L">P</div><div class="k">문제 탐구</div><div class="e">Problem Research</div><div class="tool"><b>정지거리 측정</b><a href="stopping.html#sample">완성 예시</a></div></div>
       <div class="st"><div class="L">A</div><div class="k">AI·에이전트 설계</div><div class="e">AI &amp; Agent Thinking</div><div class="tool"><b>경로 비교</b><a href="route.html#w11sample">완성 예시</a></div></div>
-      <div class="st wait"><div class="L">R</div><div class="k">로봇 엔지니어링</div><div class="e">Robot Engineering</div><div class="tool"><b>반복 테스트</b><span>준비 중</span></div></div>
-      <div class="st"><div class="L">K</div><div class="k">공유·성찰</div><div class="e">Knowledge Sharing</div><div class="tool"><b>오류 신고</b><a href="route.html#reportsample">완성 예시</a></div></div>
+      <div class="st"><div class="L">R</div><div class="k">로봇 엔지니어링</div><div class="e">Robot Engineering</div><div class="tool"><b>반복 테스트</b><a href="repeat.html#sample">완성 예시</a></div></div>
+      <div class="st"><div class="L">K</div><div class="k">공유·성찰</div><div class="e">Knowledge Sharing</div><div class="tool"><b>오류 신고</b><a href="route.html#reportsample">완성 예시</a><br><span>개선 제안(통학로 진단 내)</span></div></div>
     </div>
 
     <h3>데이터 연계 흐름</h3>
     <ol class="flow">
-      <li>공공데이터 CSV</li><li>표</li><li>지도</li><li>★ 순찰 지역</li><li>정지거리 T</li><li class="wait">로봇 규칙 (준비 중)</li>
+      <li>공공데이터 CSV</li><li>표</li><li>지도</li><li>★ 순찰 지역</li><li>정지거리 T</li><li>반복 테스트 성공률</li>
     </ol>
-    <p class="fnote">순찰 지역(★)과 기준값을 모둠 코드(문자열)에 담아, PC나 차시가 바뀌어도 이어서 활용합니다.</p>
+    <p class="fnote">순찰 지역(★), 멈춤 기준(T), 성공률을 모둠 코드(문자열)에 차례로 담아, PC나 차시가 바뀌어도 이어서 활용합니다.</p>
 
     <h3>설계 원칙</h3>
     <ul class="rules">
@@ -136,17 +172,18 @@
     <ul class="use">
       <li>웹 주소로 바로 열거나, 페이지를 저장하여 파일 하나로 활용할 수 있습니다.</li>
       <li>주소 끝에 <a href="route.html#sample">#sample</a>을 붙이면 완성 예시를 확인할 수 있습니다.</li>
-      <li>각 지역의 공공데이터(CSV)를 적용할 수 있는 확산판을 준비 중입니다(2026년 내 공개 예정).</li>
+      <li>각 지역의 공공데이터(CSV)를 적용할 수 있는 확산판을 준비 중입니다(2027년 1월 공개 예정).</li>
     </ul>
   </section>
 
   <footer>
     <div class="by">한별중학교 · SPARK LAB · 이성찬</div>
-    자료 출처: 공공데이터포털 표준데이터, 지도 © OpenStreetMap 기여자(ODbL), 글꼴 IBM Plex Sans KR(OFL)
+    자료 출처: 공공데이터포털 표준데이터, 지도 © OpenStreetMap 기여자(ODbL), 글꼴 IBM Plex Sans KR·Barlow(OFL)
   </footer>
 </main>
 <script>
-// [시작일, 끝일, 제목, 설명, 링크들, 차시] — 날짜는 '이번 주' 표시에만 쓴다. 링크: [종류(go·slide·ex), 글자, 주소]
+// [시작일, 끝일, 제목, 설명, 링크들, 차시] — 날짜로 '이번 주'와 지난·앞으로를 나눈다. 링크: [종류(go·slide·ex), 글자, 주소]
+// 첫 링크가 이번 주 칸의 노랑 버튼(다음 행동)이 된다
 const LESSONS=[
   ['2026-10-12','2026-10-16','통학로 진단','공공데이터 4종의 오류를 점검하고, 지도에 모아 로봇 순찰 지역(★) 정하기',[['go','활동 열기','route.html'],['ex','완성 예시','route.html#sample']],'1~2차시'],
   ['2026-10-19','2026-10-23','통학로 데이터 구조화','같은 데이터를 표·다이어그램(계층형·그래프형)·막대·원으로 구조화하고, 목적에 맞는 방법 고르기',[['slide','수업 슬라이드','structure.html']],'3차시'],
@@ -158,14 +195,24 @@ const LESSONS=[
   ['2026-11-16','2026-11-27','인공지능 데이터 윤리 사례 분석','데이터 수집·활용에서 문제가 생긴 인공지능 사례를 조사하고, 문제점과 해결 방안을 논술하기(수행평가 영역4)',[['slide','수업 슬라이드','ethics.html']],'8~10차시'],
   ['2026-11-30','2026-12-04','정지거리 측정','교육용 로봇(마퀸)의 정지거리를 속도별로 측정해 그래프로 분석하기',[['go','활동 열기','stopping.html'],['slide','수업 슬라이드','measure.html'],['ex','완성 예시','stopping.html#sample']],'11차시'],
   ['2026-11-30','2026-12-04','순찰 로봇의 멈춤 기준과 판단 규칙','측정한 정지거리의 대푯값으로 멈춤 기준(T)을 정하고, 판단 규칙에 넣어 마퀸으로 확인하기',[['go','활동 열기','stopping.html']],'12차시'],
+  ['2026-12-07','2026-12-11','로보독 순찰 에이전트','네 발로 걷는 로보독에 판단 규칙을 넣고, 거리 센서와 장소 표지로 상황을 알아보게 하기',[['slide','수업 슬라이드','robodog.html']],'13차시'],
+  ['2026-12-07','2026-12-11','로보독 시운전과 성공 기준','시험 코스에서 로보독을 돌려 보고, 다른 모둠도 같게 셀 수 있는 성공 기준 정하기',[['go','활동 열기','repeat.html'],['slide','수업 슬라이드','robodog2.html']],'14차시'],
+  ['2026-12-14','2026-12-18','반복 테스트로 순찰 로봇 고치기','같은 상황을 10회 시험해 성공률을 구하고, 가장 많은 실패 원인을 고친 뒤 다시 시험하기',[['go','활동 열기','repeat.html'],['ex','완성 예시','repeat.html#sample']],'15~16차시'],
 ];
 const today=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}));today.setHours(0,0,0,0);
-const day=s=>{const d=new Date(s+'T00:00:00');return d;};
+const day=s=>new Date(s+'T00:00:00');
+const state=l=>today>=day(l[0])&&today<=day(l[1])?'now':today>day(l[1])?'done':'later';
+const links=(ls,soon)=>ls.length?`<div class="links">${ls.map(([k,s,h])=>`<a class="${k}" href="${h}">${s}</a>`).join('')}</div>`:(soon?'<div class="links"><span class="soon">준비 중</span></div>':'');
 document.getElementById('route').innerHTML=LESSONS.map((l,i)=>{
-  const [a,b,t,d,links,p]=l;
-  const now=today>=day(a)&&today<=day(b)&&links.length;
-  const cls=now?'now':today>day(b)?'done':links.length?'':'later';
-  return `<li class="${cls}"><div class="n">${i+1}</div><div class="box"><div class="when">${p}</div><div class="t">${t}${now?'<span class="tag">이번 주</span>':''}</div><p class="d">${d}</p>${links.length?`<div class="links">${links.map(([k,s,h])=>`<a class="${k}" href="${h}">${s}</a>`).join('')}</div>`:'<p class="d" style="margin:0">준비 중</p>'}</div></li>`;}).join('');
+  const [a,b,t,d,ls,p]=l, s=state(l);
+  return `<li class="${s}"><div class="n">${i+1}</div><div class="c"><div class="p">${p}</div><div class="t">${t}${s==='now'?'<span class="tag">이번 주</span>':''}</div><p class="d">${d}</p></div>${links(ls,s==='later')}</li>`;}).join('');
+// 이번 주 칸: 이번 주 차시가 없으면(방학·시험 주) 다음 수업을, 그것도 없으면 칸을 숨긴다
+let pick=LESSONS.map((l,i)=>[l,i]).filter(([l])=>state(l)==='now'),head='이번 주 수업';
+if(!pick.length){const nx=LESSONS.map((l,i)=>[l,i]).find(([l])=>state(l)==='later');if(nx){pick=LESSONS.map((l,i)=>[l,i]).filter(([l])=>l[0]===nx[0][0]);head='다음 수업';}}
+if(pick.length){
+  document.getElementById('nowh').textContent=head;
+  document.getElementById('now').innerHTML=pick.map(([[a,b,t,d,ls,p],i])=>`<div class="feat"><div class="p">${p}</div><div class="t">${t}</div><p class="d">${d}</p>${links(ls,true)}</div>`).join('');
+}else{document.getElementById('nowh').hidden=true;}
 </script>
 </body>
 </html>
