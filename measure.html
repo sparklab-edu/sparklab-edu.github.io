@@ -47,7 +47,8 @@ h2{margin:0 0 18px;font-size:46px;letter-spacing:-.01em;line-height:1.25}
 .brand h1{font-size:72px;margin:0;letter-spacing:-.02em;line-height:1.22;max-width:780px;position:relative}
 .brand .sub{font-size:32px;color:#d9dcd8;margin-top:16px;position:relative}
 .brand .meta{margin:0;border:0;padding:0;font-size:26px;color:#d9dcd8;position:relative}
-.brand .zz{position:absolute;left:56%;bottom:21%;width:62%;overflow:visible}
+/* 지그재그는 오른쪽 끝에서 잘린 것처럼 보이게, 슬라이드 안의 svg가 잘라 그린다(넘침 시험) */
+.brand .zz{position:absolute;left:56%;bottom:21%;width:44%;overflow:hidden}
 /* 질문 */
 .ask .body{justify-content:center}
 .q{background:var(--zone-soft);border-left:10px solid var(--zone);padding:44px 52px;font-size:54px;font-weight:700;line-height:1.35;border-radius:4px}
@@ -214,7 +215,7 @@ function mqSVG(fx,gy,s,o){
 const STAGE_NAME=['사회문제 발견','문제 탐구','AI·에이전트 설계','로봇 엔지니어링','공유·성찰'];
 function brandCover(s){
   const tags=(D.lit||[]).map(j=>`<img src="${BRAND.tags[j]}" alt="${'SPARK'[j]} ${STAGE_NAME[j]}">`).join('');
-  return `<div class="body"><svg class="zz" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,20 20,5 40,20 60,5 80,20 100,5 120,20" fill="none" stroke="#ffc20e" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`+
+  return `<div class="body"><svg class="zz" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><polyline points="3,20 24,5 45,20 66,5 87,20 100,10.7" fill="none" stroke="#ffc20e" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`+
     `<img class="logo" src="${BRAND.logo}" alt="SPARK"><div class="gap"></div>${tags?`<div class="tags">${tags}</div>`:''}<h1>${md(s.title)}</h1>${s.sub?`<div class="sub">${md(s.sub)}</div>`:''}<div class="gap"></div><p class="meta">${md(s.meta||'1학년 정보')}</p></div>`;
 }
 const R={
