@@ -1282,6 +1282,27 @@ function dSummary(d){
 // 교사: 붙여 넣은 글에서 T가 있는 모둠 코드를 모둠마다 하나씩(team.js teamCollect)
 function classTeams(text,prev){return teamCollect(text,prev,'t');}
 
+// 교사: 5단계 모둠 코드를 받지 못한 모둠. 붙여 넣은 글의 지난 모둠 코드(★)와 모둠원 측정 코드(SPARK-P)를 모아
+// 모둠마다 6단계로 바로 들어가는 모둠 코드를 만든다. 첫 T는 넣지 않는다(6단계 위 칸에서 데이터를 보기 전에 모둠이 적는다).
+function pMakeTeams(text,today){
+  text=teamClean(text);
+  const base={};teamCollect(text,[],'s').teams.forEach(t=>{base[t.b+'-'+t.m]=t;});
+  const P={};let cut=0;
+  for(const o of codeReadAll(text,P_PREFIX)){
+    if(o._cut||o.b==null||o.m==null||o.n==null||!Array.isArray(o.d)||o.d.length!==3){cut++;continue;}
+    const k=String(o.b)+'-'+String(o.m);(P[k]=P[k]||{})[String(o.n)]=o.d;
+  }
+  const keys=[...new Set([...Object.keys(base),...Object.keys(P)])].sort((a,b)=>{const x=a.split('-'),y=b.split('-');return (+x[0]-+y[0])||(+x[1]-+y[1]);});
+  const rows=keys.map(k=>{
+    const [b,m]=k.split('-'),t=base[k],p=P[k]||{},prev=(t&&t.t)||{},d=Object.assign({},prev.d||{},p),ns=Object.keys(d).sort((x,y)=>+x-+y);
+    if(!Object.keys(p).length)return{b,m,ns,code:null,msg:'측정 코드가 없어요'};
+    if(!t)return{b,m,ns,code:null,msg:'지난 모둠 코드(★)가 없어요'};
+    const keep=prev.g0!=null?{g0:prev.g0,gw:prev.gw||''}:{};
+    return{b,m,ns,code:teamEnc(teamSet(t,'t',{t0:T0,...keep,d},today)),msg:''};
+  });
+  return{rows,cut};
+}
+
 /* SPARK LAB · P 정지거리 측정 (W9-2). 설계: docs/SPARK-LAB-시리즈-설계.md 5장.
    계산·측정 코드는 calc.js, 공용 화면 도구는 apps/shared/ui.js, 모둠 코드는 apps/shared/team.js */
 const STEPS=[{t:'준비'},{t:'예측'},{t:'측정'},{t:'그래프'},{t:'모으기'},{t:'T 정하기'},{t:'결과 카드'}];
@@ -1416,7 +1437,7 @@ function show1(loud){
   if(!(i.ban&&i.mo&&i.no)){m.innerHTML='<div class="msg bad">반·모둠·번호를 먼저 적어 주세요.</div>';return gate();}
   const bad=teamCheck(t,i.ban,i.mo)||teamNeed(t,'s');
   if(bad){m.innerHTML=`<div class="msg bad">${esc(bad)}</div>`;return gate();}
-  const x=t.t,rs=x&&x.d?(x.t!=null?{msg:`지난 시간에 정한 새 T(${esc(x.t)}cm)가 모둠 코드에 있어요.`,btn:'결과 카드로 가기'}:{msg:'지난 시간 모둠 측정값과 첫 T가 모둠 코드에 있어요.',btn:'T 정하기로 가기'}):null;
+  const x=t.t,rs=x&&x.d?(x.t!=null?{msg:`지난 시간에 정한 새 T(${esc(x.t)}cm)가 모둠 코드에 있어요.`,btn:'결과 카드로 가기'}:{msg:x.g0!=null?'지난 시간 모둠 측정값과 첫 T가 모둠 코드에 있어요.':'지난 시간 모둠 측정값이 모둠 코드에 있어요.',btn:'T 정하기로 가기'}):null;
   v.innerHTML=`${rs?`<div class="box"><div class="row"><span>${rs.msg}</span><button class="btn sign" id="rs1">${rs.btn}</button></div></div>`:''}<div class="box">${teamViewHTML(t)}<div class="ask">★에 작은 순찰 로봇을 둔다면, 로봇은 사람 몇 cm 앞에서 멈춰야 할까요?</div></div>`;
   maps.m1=teamViewMap('tvmap',t);
   if(rs)$('#rs1').onclick=resumeTeam;
@@ -1766,6 +1787,10 @@ function teacher(){
    <textarea id="tin" rows="3" placeholder="모둠 코드를 여러 개 한꺼번에 붙여 넣어도 돼요"></textarea>
    <div class="row" style="margin-top:8px"><button class="btn" id="tadd">모둠 코드 넣기</button><button class="btn link" id="tclr">학급 비우기</button><span class="hint" id="tinm"></span></div>
    <div class="plot" id="tplot" style="margin-top:12px"></div><div id="ttab" style="margin-top:12px"></div>
+   <h3>측정 코드로 모둠 코드 만들기 <span class="hint">5단계 모둠 코드를 받지 못한 모둠</span></h3>
+   <textarea id="tmk" rows="3" placeholder="지난 모둠 코드(SPARK-TEAM)와 모둠원 측정 코드(SPARK-P)를 게시물째 한꺼번에 붙여 넣어도 돼요"></textarea>
+   <div class="row" style="margin-top:8px"><button class="btn" id="tmkgo">모둠 코드 만들기</button><button class="btn ghost" id="tmkall" hidden>모두 복사</button><span class="hint" id="tmkm"></span></div>
+   <div id="tmko" style="margin-top:12px"></div>
    <h3>교사 사전 실측 <span class="hint">제동거리 cm, 충돌은 -1</span></h3>
    <table><tr><th></th><th>1회</th><th>2회</th><th>3회</th></tr>${SPEEDS.map((sp,a)=>`<tr><th>${a+1} ${sp}</th>${[0,1,2].map(r=>`<td><input type="number" class="tp" data-a="${a}" data-r="${r}" step="0.5" style="width:80px" value="${esc(T.pre[a][r])}"></td>`).join('')}</tr>`).join('')}</table>
    <h3>시험해 보기</h3>
@@ -1775,6 +1800,7 @@ function teacher(){
    <table><tr><th>A</th><td>속도 단계 1 느림 → 2 보통 → 3 빠름 (속도 값 60·120·200)</td></tr><tr><th>A+B</th><td>멈춤 기준 T 10 → 15 → … → 40cm</td></tr><tr><th>B</th><td>출발 → 멈추면 남은 거리 g(cm)를 화면에 세 번</td></tr></table>
    <h3>자주 막히는 곳</h3>
    <table><tr><th>1단계</th><td>모둠 코드가 없음 → 같은 모둠원의 AI 교수·학습 플랫폼 글에서 복사. 모둠 번호가 다르면 막힘(의도)</td></tr>
+   <tr><th>1단계</th><td>측정 코드(SPARK-P)만 있고 5단계 모둠 코드가 없음 → 위 [모둠 코드 만들기]로 만든 코드를 1단계에 넣으면 [T 정하기로 가기]</td></tr>
    <tr><th>3단계</th><td>제동거리 칸이 틀림 → T − g를 직접 계산하는 것이 목적(의도). g가 T보다 큼 → 초음파가 잘못 읽어 일찍 멈춤, 다시 재기</td></tr>
    <tr><th>4단계</th><td>축을 바꿔 고름 → 의도된 막힘. "속도가 빠를수록"을 말할 수 있는 축은?</td></tr>
    <tr><th>6단계</th><td>평균·중앙값·최댓값 비교. 평균이나 중앙값을 고르면 몇 번 부딪힐지 세게 함. 최댓값 + 여유로 가는 것이 목표</td></tr></table>`;
@@ -1783,6 +1809,14 @@ function teacher(){
   $('#tun').onchange=e=>{S.unlock=e.target.checked;save();rail();};
   $('#treset').onclick=()=>{if(confirm('이 PC에 저장된 학생 작업을 지울까요?')){try{localStorage.removeItem(KEY);}catch(e){}S=fresh();el.hidden=true;render();}};
   $('#tadd').onclick=()=>{const T=tLoad(),r=classTeams($('#tin').value,T.teams);T.teams=r.teams;tSave(T);$('#tinm').textContent=`${r.added}개 모둠 넣음${r.skipped?` · ${r.skipped}개는 T가 없거나 잘렸어요`:''}${r.dup.length?` · ${r.dup.join(', ')}: 같은 날 코드가 여러 개라 마지막 것을 썼어요`:''}`;$('#tin').value='';tDraw();};
+  $('#tmkgo').onclick=()=>{
+    const r=pMakeTeams($('#tmk').value,teamToday()),ok=r.rows.filter(x=>x.code);
+    $('#tmkm').textContent=r.rows.length?`${ok.length}개 모둠 만듦${r.cut?` · 잘린 측정 코드 ${r.cut}개는 뺐어요`:''}`:'모둠 코드나 측정 코드를 찾지 못했어요.';
+    $('#tmko').innerHTML=r.rows.length?`<table><tr><th>모둠</th><th>측정 코드</th><th>6단계용 모둠 코드</th><th></th></tr>${r.rows.map((x,i)=>`<tr><td style="white-space:nowrap">${esc(x.b)}반 ${esc(x.m)}모둠</td><td style="white-space:nowrap">${x.ns.length?esc(x.ns.join('·'))+'번':'-'}</td><td>${x.code?`<div class="code" id="tmkc${i}">${esc(x.code)}</div>`:`<span class="msg bad" style="margin:0">${esc(x.msg)}</span>`}</td><td style="white-space:nowrap">${x.code?`<button class="btn link tmkcp" data-i="${i}">복사</button>`:''}</td></tr>`).join('')}</table>`:'';
+    $$('.tmkcp').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;copyText(r.rows[i].code,$('#tmkm'),$('#tmkc'+i));});
+    const all=$('#tmkall');all.hidden=!ok.length;
+    all.onclick=()=>copyText(ok.map(x=>`${x.b}반 ${x.m}모둠\n${x.code}`).join('\n\n'),$('#tmkm'),$('#tmko'));
+  };
   $('#tclr').onclick=()=>{const T=tLoad();T.teams=[];tSave(T);$('#tinm').textContent='';tDraw();};
   $$('#teacher .tp').forEach(inp=>inp.oninput=()=>{const T=tLoad();T.pre[+inp.dataset.a][+inp.dataset.r]=inp.value;tSave(T);tDraw();});
   $('#tsample').onclick=()=>{S=sampleState();save();el.hidden=true;render();};
