@@ -1627,7 +1627,7 @@ function view6(){
   ${ftBox}
   <div class="box"><h3>우리 모둠 빠름 단계</h3>
     <p style="margin:0 0 4px">${f.n}번${f.hits?` · 충돌 <b>${f.hits}</b>번`:''}</p>
-    ${fastTableHTML(groupD())}
+    <div class="row" style="align-items:center;gap:20px">${fastTableHTML(groupD())}<div style="flex:1;min-width:260px;max-width:460px">${tFigSVG()}</div></div>
     <table class="dt" style="margin:0 0 12px;width:auto"><tr><th>평균</th><td><b>${f.mean??'-'}</b>cm</td><td class="hint">${f.hits?`충돌 ${f.hits}번은 계산에 넣지 못함`:''}</td></tr><tr><th>중앙값</th><td><b>${f.med??'충돌'}</b>${f.med!=null?'cm':''}</td><td class="hint">${f.hits?'충돌은 가장 긴 값으로 놓고 가운데를 찾음':''}</td></tr><tr><th>최댓값</th><td><b>${f.max??'-'}</b>cm</td><td></td></tr></table>
     <div class="row">
       <label>대표값 ${sel('rep',[['mean','평균'],['med','중앙값'],['max','최댓값']],s.rep)}</label>
@@ -1638,11 +1638,14 @@ function view6(){
   </div>
   <div class="box"><label>근거 한 줄 <span class="hint">어느 값에 여유를 얼마나 더해 새 T를 정했나요?</span><input type="text" id="why" style="width:100%;margin-top:6px" value="${esc(s.why)}" placeholder="예: ○○ ○cm에 여유 ○cm를 더해서"></label></div>
   <div class="box"><h3>새 T로 빠름 단계 한 번 더</h3>
-    <p style="margin:0 0 8px">A+B로 T를 새 T에 맞추고, A로 3(빠름)을 고른 뒤 B로 출발</p>
-    <details style="margin:0 0 10px"><summary>마퀸에 측정 코드가 없어요</summary>
-      <p style="margin:8px 0">MakeCode 새 프로젝트 → 확장에서 maqueen 추가 → JavaScript 탭에 붙여 넣기 → 다운로드</p>
-      <div class="row"><button class="btn ghost" id="mcc6">측정 코드 복사</button><a class="btn ghost" href="https://makecode.microbit.org/" target="_blank" rel="noopener">MakeCode 열기</a><span class="hint" id="mcm6"></span></div>
-    </details>
+    <ol style="margin:0 0 12px;padding-left:22px;line-height:1.9">
+      <li>마퀸에 측정 코드 넣기: <b>[측정 코드 복사]</b> → <b>[MakeCode 열기]</b>에서 새 프로젝트 → 확장에서 <b>maqueen</b> 추가 → 위쪽 <b>JavaScript</b> 탭에 붙여 넣기(원래 글은 지우기) → <b>다운로드</b>한 파일을 마이크로비트에 넣기</li>
+      <li><b>A+B</b>를 눌러 화면의 T를 <b>새 T</b>에 맞추기</li>
+      <li><b>A</b>로 <b>3</b>(빠름)을 고르고 <b>B</b>로 출발</li>
+      <li>멈췄는지 부딪혔는지 고르기</li>
+    </ol>
+    <div class="row" style="margin:0 0 8px"><button class="btn ghost" id="mcc6">측정 코드 복사</button><a class="btn ghost" href="https://makecode.microbit.org/" target="_blank" rel="noopener">MakeCode 열기</a><span class="hint" id="mcm6"></span></div>
+    <pre id="mcb6" style="font-size:12px;background:var(--well);border-radius:5px;padding:8px 10px;max-height:160px;overflow:auto;margin:0 0 12px;color:var(--sub)">${esc(MEASURE_CODE)}</pre>
     <div class="row">${[['ok','멈췄다'],['hit','부딪혔다']].map(([k,l])=>`<label><input type="radio" name="re" value="${k}" ${s.re===k?'checked':''}> ${l}</label>`).join('')}</div>
   </div>
   <div id="n6"></div>`;
@@ -1650,7 +1653,7 @@ function view6(){
   $('#mg').oninput=e=>{s.mg=e.target.value;save();upd6();};
   $('#tt').onchange=e=>{s.t=e.target.value;save();upd6();};
   $('#why').oninput=e=>{s.why=e.target.value;save();gate6();};
-  $('#mcc6').onclick=()=>copyText(MEASURE_CODE,$('#mcm6'),$('#mcm6'));
+  $('#mcc6').onclick=()=>copyText(MEASURE_CODE,$('#mcm6'),$('#mcb6'));
   $$('input[name=re]').forEach(r=>r.onchange=()=>{s.re=r.value;save();gate6();});
   const g0=$('#g0');if(g0){g0.onchange=e=>{S.s5.g0=e.target.value;save();gate6();};$('#gw').oninput=e=>{S.s5.gw=e.target.value;save();gate6();};}
   upd6();
