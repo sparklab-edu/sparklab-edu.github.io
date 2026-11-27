@@ -1627,6 +1627,7 @@ function view6(){
   ${ftBox}
   <div class="box"><h3>우리 모둠 빠름 단계</h3>
     <p style="margin:0 0 4px">${f.n}번${f.hits?` · 충돌 <b>${f.hits}</b>번`:''}</p>
+    ${fastTableHTML(groupD())}
     <table class="dt" style="margin:0 0 12px;width:auto"><tr><th>평균</th><td><b>${f.mean??'-'}</b>cm</td><td class="hint">${f.hits?`충돌 ${f.hits}번은 계산에 넣지 못함`:''}</td></tr><tr><th>중앙값</th><td><b>${f.med??'충돌'}</b>${f.med!=null?'cm':''}</td><td class="hint">${f.hits?'충돌은 가장 긴 값으로 놓고 가운데를 찾음':''}</td></tr><tr><th>최댓값</th><td><b>${f.max??'-'}</b>cm</td><td></td></tr></table>
     <div class="row">
       <label>대표값 ${sel('rep',[['mean','평균'],['med','중앙값'],['max','최댓값']],s.rep)}</label>
@@ -1635,8 +1636,13 @@ function view6(){
     </div>
     <div id="ask6"></div><div id="m6"></div>
   </div>
-  <div class="box"><label>근거 한 줄<input type="text" id="why" style="width:100%;margin-top:6px" value="${esc(s.why)}" placeholder="빠름 단계 ___ ___cm에 여유 ___cm"></label></div>
+  <div class="box"><label>근거 한 줄 <span class="hint">어느 값에 여유를 얼마나 더해 새 T를 정했나요?</span><input type="text" id="why" style="width:100%;margin-top:6px" value="${esc(s.why)}" placeholder="예: ○○ ○cm에 여유 ○cm를 더해서"></label></div>
   <div class="box"><h3>새 T로 빠름 단계 한 번 더</h3>
+    <p style="margin:0 0 8px">A+B로 T를 새 T에 맞추고, A로 3(빠름)을 고른 뒤 B로 출발</p>
+    <details style="margin:0 0 10px"><summary>마퀸에 측정 코드가 없어요</summary>
+      <p style="margin:8px 0">MakeCode 새 프로젝트 → 확장에서 maqueen 추가 → JavaScript 탭에 붙여 넣기 → 다운로드</p>
+      <div class="row"><button class="btn ghost" id="mcc6">측정 코드 복사</button><a class="btn ghost" href="https://makecode.microbit.org/" target="_blank" rel="noopener">MakeCode 열기</a><span class="hint" id="mcm6"></span></div>
+    </details>
     <div class="row">${[['ok','멈췄다'],['hit','부딪혔다']].map(([k,l])=>`<label><input type="radio" name="re" value="${k}" ${s.re===k?'checked':''}> ${l}</label>`).join('')}</div>
   </div>
   <div id="n6"></div>`;
@@ -1644,16 +1650,66 @@ function view6(){
   $('#mg').oninput=e=>{s.mg=e.target.value;save();upd6();};
   $('#tt').onchange=e=>{s.t=e.target.value;save();upd6();};
   $('#why').oninput=e=>{s.why=e.target.value;save();gate6();};
+  $('#mcc6').onclick=()=>copyText(MEASURE_CODE,$('#mcm6'),$('#mcm6'));
   $$('input[name=re]').forEach(r=>r.onchange=()=>{s.re=r.value;save();gate6();});
   const g0=$('#g0');if(g0){g0.onchange=e=>{S.s5.g0=e.target.value;save();gate6();};$('#gw').oninput=e=>{S.s5.gw=e.target.value;save();gate6();};}
   upd6();
 }
+// 6단계: 평균·중앙값으로 몇 번 부딪힐지 세려면 모둠원 빠름 단계 값이 보여야 한다(색으로 표시하지 않음: 학생이 센다)
+function fastTableHTML(G){
+  const ns=Object.keys(G).sort((a,b)=>+a-+b);
+  if(!ns.length)return '';
+  return `<table class="dt" style="margin:6px 0 12px;width:auto"><tr><th>제동거리(cm)</th><th>1회</th><th>2회</th><th>3회</th></tr>${ns.map(n=>`<tr><th>${esc(n)}번</th>${G[n][2].map(v=>v<0?'<td style="color:#cf3027">✕ 충돌</td>':`<td class="num">${esc(v)}</td>`).join('')}</tr>`).join('')}</table>`;
+}
+// 6단계 '새 T로 한 번 더': 컴퓨터실 PC를 다시 켜면 MakeCode가 지워져 측정 코드를 다시 넣는다(docs/마퀸_멈춤기준_실험_코드.md ①, 마퀸 라이트)
+var MEASURE_CODE=`let speeds = [60, 120, 200]  // 느림·보통·빠름 (0~255)
+let level = 0
+let T = 20                   // 멈춤 기준값(cm)
+let running = false
+
+basic.showNumber(level + 1)
+
+input.onButtonPressed(Button.A, function () {
+    if (!running) {
+        level = (level + 1) % 3
+        basic.showNumber(level + 1)
+    }
+})
+input.onButtonPressed(Button.AB, function () {
+    if (!running) {
+        T = T >= 40 ? 10 : T + 5
+        basic.showNumber(T)
+    }
+})
+input.onButtonPressed(Button.B, function () {
+    if (!running) {
+        running = true
+        basic.clearScreen()
+        maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, speeds[level])
+    }
+})
+basic.forever(function () {
+    if (running) {
+        let d = maqueen.Ultrasonic()   // cm. 측정 실패 시 500을 돌려준다
+        if (d < T) {
+            maqueen.motorStop(maqueen.Motors.All)
+            running = false
+            basic.pause(500)                 // 완전히 멈출 때까지 기다린 뒤
+            let g = maqueen.Ultrasonic()     // 벽까지 남은 거리 g(cm)를 다시 재서
+            for (let i = 0; i < 3; i++) {    // 화면에 세 번 보여 준다
+                basic.showNumber(g)
+                basic.pause(300)
+            }
+        }
+    }
+})
+`;
 function upd6(){
   const s=S.s6,f=pFast(groupD()),a=$('#ask6');
   if(asksHits(f,s.rep)){
     const nm=REP_NAME[s.rep],bv=repValue(f,s.rep);
     a.innerHTML=`<div class="ask" style="margin:12px 0 0">${nm}(${bv}cm)으로 정하면, 우리 모둠 빠름 단계 ${f.n}번 가운데 몇 번 부딪힐까요? <input type="number" id="ans" min="0" max="${f.n}" style="width:70px" value="${esc(s.ans)}"> 번</div><div id="ansm"></div>`;
-    const show=()=>{$('#ansm').innerHTML=s.ans===''?'':ansOk()?`<div class="msg ok">맞아요. ${f.n}번 가운데 ${hitsAt(f,bv)}번 부딪혀요.</div>`:`<div class="msg bad">그래프에서 ${nm}보다 높은 점과 ✕를 세어 보세요.</div>`;};
+    const show=()=>{$('#ansm').innerHTML=s.ans===''?'':ansOk()?`<div class="msg ok">맞아요. ${f.n}번 가운데 ${hitsAt(f,bv)}번 부딪혀요.</div>`:`<div class="msg bad">위 표에서 ${nm}(${bv}cm)보다 큰 값과 충돌을 세어 보세요.</div>`;};
     $('#ans').oninput=e=>{s.ans=e.target.value;save();show();gate6();};
     show();
   } else a.innerHTML='';
